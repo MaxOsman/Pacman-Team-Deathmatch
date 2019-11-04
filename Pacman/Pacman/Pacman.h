@@ -20,6 +20,16 @@ using namespace S2D;
 class Pacman : public Game
 {
 private:
+
+	//Methods
+	void Input(int elapsedTime, Input::KeyboardState* state);
+	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
+	void CheckStart(Input::KeyboardState* state);
+	void CheckViewportCollision();
+	void UpdatePacman(int elapsedTime, Input::KeyboardState* state);
+	void UpdateMunchie(int elapsedTime);
+
+
 	// Data to represent Pacman
 	Vector2* _pacmanPosition[4];
 	Rect* _pacmanSourceRect[4];
@@ -74,7 +84,8 @@ private:
 	Vector2* _spacePos;
 
 	bool _pKeyDown;
-	bool _aKeyDown;
+	bool _dirKeyDown;
+	bool _retKeyDown;
 	signed int _arrowPlace;	//0 = start, 1 = help, 2 = quit
 	int _arrowOffset;
 	

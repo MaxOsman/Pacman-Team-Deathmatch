@@ -13,7 +13,8 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.2f), 
 	_startmenu = true;
 	_helpmenu = false;
 	_pKeyDown = false;
-	_aKeyDown = false;
+	_dirKeyDown = false;
+	_retKeyDown = false;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -134,6 +135,268 @@ void Pacman::LoadContent()
 	_stringPosition = new Vector2(10.0f, 25.0f);
 }
 
+void Pacman::Input(int elapsedTime, Input::KeyboardState* state) 
+{
+	// Checks if key is pressed, Pac1
+	if (state->IsKeyDown(Input::Keys::W))
+	{
+		_pacmanPosition[0]->Y -= _cPacmanSpeed * elapsedTime; //Moves Pacman across Y axis
+		_pacmanDir[0] = 3;
+	}
+	else if (state->IsKeyDown(Input::Keys::A))
+	{
+		_pacmanPosition[0]->X -= _cPacmanSpeed * elapsedTime; //Moves Pacman across X axis
+		_pacmanDir[0] = 2;
+	}
+	else if (state->IsKeyDown(Input::Keys::S))
+	{
+		_pacmanPosition[0]->Y += _cPacmanSpeed * elapsedTime; //Moves Pacman across Y axis
+		_pacmanDir[0] = 1;
+	}
+	else if (state->IsKeyDown(Input::Keys::D))
+	{
+		_pacmanPosition[0]->X += _cPacmanSpeed * elapsedTime; //Moves Pacman across X axis
+		_pacmanDir[0] = 0;
+	}
+
+	// Checks if key is pressed, Pac2
+	if (state->IsKeyDown(Input::Keys::I))
+	{
+		_pacmanPosition[1]->Y -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[1] = 3;
+	}
+	else if (state->IsKeyDown(Input::Keys::J))
+	{
+		_pacmanPosition[1]->X -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[1] = 2;
+	}
+	else if (state->IsKeyDown(Input::Keys::K))
+	{
+		_pacmanPosition[1]->Y += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[1] = 1;
+	}
+	else if (state->IsKeyDown(Input::Keys::L))
+	{
+		_pacmanPosition[1]->X += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[1] = 0;
+	}
+
+	// Checks if key is pressed, Pac3
+	if (state->IsKeyDown(Input::Keys::UP))
+	{
+		_pacmanPosition[2]->Y -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[2] = 3;
+	}
+	else if (state->IsKeyDown(Input::Keys::LEFT))
+	{
+		_pacmanPosition[2]->X -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[2] = 2;
+	}
+	else if (state->IsKeyDown(Input::Keys::DOWN))
+	{
+		_pacmanPosition[2]->Y += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[2] = 1;
+	}
+	else if (state->IsKeyDown(Input::Keys::RIGHT))
+	{
+		_pacmanPosition[2]->X += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[2] = 0;
+	}
+
+	// Checks if key is pressed, Pac4
+	if (state->IsKeyDown(Input::Keys::NUMPAD5))
+	{
+		_pacmanPosition[3]->Y -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[3] = 3;
+	}
+	else if (state->IsKeyDown(Input::Keys::NUMPAD1))
+	{
+		_pacmanPosition[3]->X -= _cPacmanSpeed * elapsedTime;
+		_pacmanDir[3] = 2;
+	}
+	else if (state->IsKeyDown(Input::Keys::NUMPAD2))
+	{
+		_pacmanPosition[3]->Y += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[3] = 1;
+	}
+	else if (state->IsKeyDown(Input::Keys::NUMPAD3))
+	{
+		_pacmanPosition[3]->X += _cPacmanSpeed * elapsedTime;
+		_pacmanDir[3] = 0;
+	}
+}
+
+void Pacman::CheckViewportCollision()
+{
+	for (int i = 0; i < 4; i++)
+	{
+		// Screen loop
+		if (_pacmanPosition[i]->X > Graphics::GetViewportWidth())
+		{
+			_pacmanPosition[i]->X = -static_cast<float>(_pacmanSourceRect[i]->Width);	//One is float, other is int
+		}
+		if (_pacmanPosition[i]->X < -_pacmanSourceRect[i]->Width)
+		{
+			_pacmanPosition[i]->X = static_cast<float>(Graphics::GetViewportWidth());
+		}
+		if (_pacmanPosition[i]->Y > Graphics::GetViewportHeight())
+		{
+			_pacmanPosition[i]->Y = -static_cast<float>(_pacmanSourceRect[i]->Height);
+		}
+		if (_pacmanPosition[i]->Y < -_pacmanSourceRect[i]->Height)
+		{
+			_pacmanPosition[i]->Y = static_cast<float>(Graphics::GetViewportHeight());
+		}
+	}
+}
+
+void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
+{
+	if (state->IsKeyDown(Input::Keys::W) || state->IsKeyDown(Input::Keys::A) || state->IsKeyDown(Input::Keys::S) || state->IsKeyDown(Input::Keys::D))
+	{
+		_pacmanCurrentFrameTime[0] += elapsedTime;
+		if (_pacmanCurrentFrameTime[0] > _cPacmanFrameTime)
+		{
+			_pacmanFrame[0]++;
+			if (_pacmanFrame[0] >= 2)
+				_pacmanFrame[0] = 0;
+
+			_pacmanCurrentFrameTime[0] = 0;
+		}
+	}
+
+	if (state->IsKeyDown(Input::Keys::I) || state->IsKeyDown(Input::Keys::J) || state->IsKeyDown(Input::Keys::K) || state->IsKeyDown(Input::Keys::L))
+	{
+		_pacmanCurrentFrameTime[1] += elapsedTime;
+		if (_pacmanCurrentFrameTime[1] > _cPacmanFrameTime)
+		{
+			_pacmanFrame[1]++;
+			if (_pacmanFrame[1] >= 2)
+				_pacmanFrame[1] = 0;
+
+			_pacmanCurrentFrameTime[1] = 0;
+		}
+	}
+
+	if (state->IsKeyDown(Input::Keys::UP) || state->IsKeyDown(Input::Keys::LEFT) || state->IsKeyDown(Input::Keys::DOWN) || state->IsKeyDown(Input::Keys::RIGHT))
+	{
+		_pacmanCurrentFrameTime[2] += elapsedTime;
+		if (_pacmanCurrentFrameTime[2] > _cPacmanFrameTime)
+		{
+			_pacmanFrame[2]++;
+			if (_pacmanFrame[2] >= 2)
+				_pacmanFrame[2] = 0;
+
+			_pacmanCurrentFrameTime[2] = 0;
+		}
+	}
+
+	if (state->IsKeyDown(Input::Keys::NUMPAD5) || state->IsKeyDown(Input::Keys::NUMPAD1) || state->IsKeyDown(Input::Keys::NUMPAD2) || state->IsKeyDown(Input::Keys::NUMPAD3))
+	{
+		_pacmanCurrentFrameTime[3] += elapsedTime;
+		if (_pacmanCurrentFrameTime[3] > _cPacmanFrameTime)
+		{
+			_pacmanFrame[3]++;
+			if (_pacmanFrame[3] >= 2)
+				_pacmanFrame[3] = 0;
+
+			_pacmanCurrentFrameTime[3] = 0;
+		}
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		//Change direction, animate
+		_pacmanSourceRect[i]->Y = _pacmanSourceRect[i]->Height * static_cast<float>(_pacmanDir[i]);
+		_pacmanSourceRect[i]->X = _pacmanSourceRect[i]->Width * _pacmanFrame[i];
+	}
+}
+
+void Pacman::UpdateMunchie(int elapsedTime)
+{
+	_munchieCurrentFrameTime += elapsedTime;
+	if (_munchieCurrentFrameTime > _cMunchieFrameTime)
+	{
+		_munchieFrame++;
+		if (_munchieFrame >= 2)
+			_munchieFrame = 0;
+
+		_munchieCurrentFrameTime = 0;
+	}
+	_munchieSourceRect->X = _munchieSourceRect->Width * _munchieFrame;
+}
+
+void Pacman::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
+{
+	if (state->IsKeyDown(pauseKey) && !_pKeyDown)
+	{
+		_pKeyDown = true;
+		_paused = !_paused;
+	}
+	else if (state->IsKeyUp(pauseKey) && !_helpmenu)
+	{
+		_pKeyDown = false;
+		CheckStart(state);
+	}
+
+	if (state->IsKeyDown(Input::Keys::SPACE) && _helpmenu)
+	{
+		_helpmenu = false;
+	}
+}
+
+void Pacman::CheckStart(Input::KeyboardState* state)
+{
+	if (state->IsKeyDown(Input::Keys::S) && !_dirKeyDown && !_retKeyDown)
+	{
+		_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
+		if (_arrowPlace >= 2)
+		{
+			_arrowPlace = 0;
+		}
+		else
+		{
+			_arrowPlace++;
+		}
+		_dirKeyDown = true;
+		_arrowOffset = 64 * _arrowPlace;
+	}
+
+	if (state->IsKeyDown(Input::Keys::W) && !_dirKeyDown)
+	{
+		_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
+		if (_arrowPlace <= 0)
+		{
+			_arrowPlace = 2;
+		}
+		else
+		{
+			_arrowPlace--;
+		}
+		_dirKeyDown = true;
+		_arrowOffset = 64 * _arrowPlace;
+	}
+
+	if (state->IsKeyUp(Input::Keys::W) && state->IsKeyUp(Input::Keys::S))
+		_dirKeyDown = false;
+	if (state->IsKeyUp(Input::Keys::RETURN))
+		_retKeyDown = false;
+	if (state->IsKeyDown(Input::Keys::RETURN) && !_retKeyDown)
+	{
+		if (_arrowPlace == 0)
+		{
+			_startmenu = false;
+			_paused = false;
+		}
+		else if (_arrowPlace == 1)
+			_helpmenu = true;
+		if (_arrowPlace == 2)
+			Graphics::Destroy();
+
+		_retKeyDown = true;
+	}
+}
+
 void Pacman::Update(int elapsedTime)
 {
 	// Gets the current state of the keyboard
@@ -143,239 +406,17 @@ void Pacman::Update(int elapsedTime)
 	{
 		if (!_paused)
 		{
-			//Animate munchie
-			_munchieCurrentFrameTime += elapsedTime;
-			if (_munchieCurrentFrameTime > _cMunchieFrameTime)
-			{
-				_munchieFrame++;
-				if (_munchieFrame >= 2)
-					_munchieFrame = 0;
-
-				_munchieCurrentFrameTime = 0;
-			}
-			_munchieSourceRect->X = _munchieSourceRect->Width * _munchieFrame;
-
-			// Checks if key is pressed, Pac1
-			if (keyboardState->IsKeyDown(Input::Keys::W))
-			{
-				_pacmanPosition[0]->Y -= _cPacmanSpeed * elapsedTime; //Moves Pacman across Y axis
-				_pacmanDir[0] = 3;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::A))
-			{
-				_pacmanPosition[0]->X -= _cPacmanSpeed * elapsedTime; //Moves Pacman across X axis
-				_pacmanDir[0] = 2;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::S))
-			{
-				_pacmanPosition[0]->Y += _cPacmanSpeed * elapsedTime; //Moves Pacman across Y axis
-				_pacmanDir[0] = 1;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::D))
-			{
-				_pacmanPosition[0]->X += _cPacmanSpeed * elapsedTime; //Moves Pacman across X axis
-				_pacmanDir[0] = 0;
-			}
-
-			if (keyboardState->IsKeyDown(Input::Keys::W) || keyboardState->IsKeyDown(Input::Keys::A) || keyboardState->IsKeyDown(Input::Keys::S) || keyboardState->IsKeyDown(Input::Keys::D))
-			{
-				_pacmanCurrentFrameTime[0] += elapsedTime;
-				if (_pacmanCurrentFrameTime[0] > _cPacmanFrameTime)
-				{
-					_pacmanFrame[0]++;
-					if (_pacmanFrame[0] >= 2)
-						_pacmanFrame[0] = 0;
-
-					_pacmanCurrentFrameTime[0] = 0;
-				}
-			}
-
-			// Checks if key is pressed, Pac2
-			if (keyboardState->IsKeyDown(Input::Keys::I))
-			{
-				_pacmanPosition[1]->Y -= _cPacmanSpeed * elapsedTime; 
-				_pacmanDir[1] = 3;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::J))
-			{
-				_pacmanPosition[1]->X -= _cPacmanSpeed * elapsedTime; 
-				_pacmanDir[1] = 2;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::K))
-			{
-				_pacmanPosition[1]->Y += _cPacmanSpeed * elapsedTime; 
-				_pacmanDir[1] = 1;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::L))
-			{
-				_pacmanPosition[1]->X += _cPacmanSpeed * elapsedTime; 
-				_pacmanDir[1] = 0;
-			}
-
-			if (keyboardState->IsKeyDown(Input::Keys::I) || keyboardState->IsKeyDown(Input::Keys::J) || keyboardState->IsKeyDown(Input::Keys::K) || keyboardState->IsKeyDown(Input::Keys::L))
-			{
-				_pacmanCurrentFrameTime[1] += elapsedTime;
-				if (_pacmanCurrentFrameTime[1] > _cPacmanFrameTime)
-				{
-					_pacmanFrame[1]++;
-					if (_pacmanFrame[1] >= 2)
-						_pacmanFrame[1] = 0;
-
-					_pacmanCurrentFrameTime[1] = 0;
-				}
-			}
-
-			// Checks if key is pressed, Pac3
-			if (keyboardState->IsKeyDown(Input::Keys::UP))
-			{
-				_pacmanPosition[2]->Y -= _cPacmanSpeed * elapsedTime;
-				_pacmanDir[2] = 3;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::LEFT))
-			{
-				_pacmanPosition[2]->X -= _cPacmanSpeed * elapsedTime; 
-				_pacmanDir[2] = 2;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::DOWN))
-			{
-				_pacmanPosition[2]->Y += _cPacmanSpeed * elapsedTime;
-				_pacmanDir[2] = 1;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::RIGHT))
-			{
-				_pacmanPosition[2]->X += _cPacmanSpeed * elapsedTime;
-				_pacmanDir[2] = 0;
-			}
-
-			if (keyboardState->IsKeyDown(Input::Keys::UP) || keyboardState->IsKeyDown(Input::Keys::LEFT) || keyboardState->IsKeyDown(Input::Keys::DOWN) || keyboardState->IsKeyDown(Input::Keys::RIGHT))
-			{
-				_pacmanCurrentFrameTime[2] += elapsedTime;
-				if (_pacmanCurrentFrameTime[2] > _cPacmanFrameTime)
-				{
-					_pacmanFrame[2]++;
-					if (_pacmanFrame[2] >= 2)
-						_pacmanFrame[2] = 0;
-
-					_pacmanCurrentFrameTime[2] = 0;
-				}
-			}
-
-			// Checks if key is pressed, Pac4
-			if (keyboardState->IsKeyDown(Input::Keys::NUMPAD5))
-			{
-				_pacmanPosition[3]->Y -= _cPacmanSpeed * elapsedTime;
-				_pacmanDir[3] = 3;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::NUMPAD1))
-			{
-				_pacmanPosition[3]->X -= _cPacmanSpeed * elapsedTime;
-				_pacmanDir[3] = 2;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::NUMPAD2))
-			{
-				_pacmanPosition[3]->Y += _cPacmanSpeed * elapsedTime;
-				_pacmanDir[3] = 1;
-			}
-			else if (keyboardState->IsKeyDown(Input::Keys::NUMPAD3))
-			{
-				_pacmanPosition[3]->X += _cPacmanSpeed * elapsedTime;
-				_pacmanDir[3] = 0;
-			}
-
-			if (keyboardState->IsKeyDown(Input::Keys::NUMPAD5) || keyboardState->IsKeyDown(Input::Keys::NUMPAD1) || keyboardState->IsKeyDown(Input::Keys::NUMPAD2) || keyboardState->IsKeyDown(Input::Keys::NUMPAD3))
-			{
-				_pacmanCurrentFrameTime[3] += elapsedTime;
-				if (_pacmanCurrentFrameTime[3] > _cPacmanFrameTime)
-				{
-					_pacmanFrame[3]++;
-					if (_pacmanFrame[3] >= 2)
-						_pacmanFrame[3] = 0;
-
-					_pacmanCurrentFrameTime[3] = 0;
-				}
-			}
-
-			// Stuff for all 4
-			for(int i = 0; i < 4; i++)
-			{
-				// Screen loop
-				if (_pacmanPosition[i]->X > Graphics::GetViewportWidth())
-				{
-					_pacmanPosition[i]->X = -static_cast<float>(_pacmanSourceRect[i]->Width);	//One is float, other is int
-				}
-				if (_pacmanPosition[i]->X < -_pacmanSourceRect[i]->Width)
-				{
-					_pacmanPosition[i]->X = static_cast<float>(Graphics::GetViewportWidth());
-				}
-				if (_pacmanPosition[i]->Y > Graphics::GetViewportHeight())
-				{
-					_pacmanPosition[i]->Y = -static_cast<float>(_pacmanSourceRect[i]->Height);
-				}
-				if (_pacmanPosition[i]->Y < -_pacmanSourceRect[i]->Height)
-				{
-					_pacmanPosition[i]->Y = static_cast<float>(Graphics::GetViewportHeight());
-				}
-
-				//Change direction, animate
-				_pacmanSourceRect[i]->Y = _pacmanSourceRect[i]->Height * static_cast<float>(_pacmanDir[i]);
-				_pacmanSourceRect[i]->X = _pacmanSourceRect[i]->Width * _pacmanFrame[i];
-			}
+			Input(elapsedTime, keyboardState);
+			CheckViewportCollision();
 		}
 
-		if (keyboardState->IsKeyDown(Input::Keys::P) && !_pKeyDown)
-		{
-			_pKeyDown = true;
-			_paused = !_paused;
-		}
-		if (keyboardState->IsKeyUp(Input::Keys::P))
-			_pKeyDown = false;
+		UpdatePacman(elapsedTime, keyboardState);
+		UpdateMunchie(elapsedTime);
+		CheckPaused(keyboardState, Input::Keys::P);
 	}
 	else if(!_helpmenu)
 	{
-		if (keyboardState->IsKeyDown(Input::Keys::S) && !_aKeyDown)
-		{
-			_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
-			if (_arrowPlace >= 2)
-			{
-				_arrowPlace = 0;
-			}
-			else
-			{
-				_arrowPlace++;
-			}
-			_aKeyDown = true;
-			_arrowOffset = 64 * _arrowPlace;
-		}
-
-		if (keyboardState->IsKeyDown(Input::Keys::W) && !_aKeyDown)
-		{
-			_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
-			if (_arrowPlace <= 0)
-			{
-				_arrowPlace = 2;
-			}
-			else
-			{
-				_arrowPlace--;
-			}
-			_aKeyDown = true;
-			_arrowOffset = 64 * _arrowPlace;
-		}
-
-		if (keyboardState->IsKeyUp(Input::Keys::W) && keyboardState->IsKeyUp(Input::Keys::S))
-			_aKeyDown = false;
-		if (keyboardState->IsKeyDown(Input::Keys::RETURN))
-		{
-			if (_arrowPlace == 0)
-				_startmenu = false;
-			else if (_arrowPlace == 1)
-				_helpmenu = true;
-			if (_arrowPlace == 2)
-			{
-				
-			}
-				//help
-		}
+		CheckStart(keyboardState);
 	}
 	else if (_helpmenu)
 	{
@@ -406,16 +447,34 @@ void Pacman::Draw(int elapsedTime)
 
 	if (_paused)
 	{
-		std::stringstream menuStream; 
-		menuStream << "PAUSED";
-		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr); 
-		SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Red);
+		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr);
+
+		SpriteBatch::Draw(_arrowTexture, _arrowPos, _arrowSourceRect);
+		_arrowPos->Y += _arrowOffset;
+		_arrowOffset = 0;
+
+		std::stringstream titleStream;
+		titleStream << "-PAUSED-";
+		SpriteBatch::DrawString(titleStream.str().c_str(), _titleStringPosition, Color::Red);
+
+		std::stringstream startStream;
+		startStream << "Resume Game";
+		SpriteBatch::DrawString(startStream.str().c_str(), _startStringPosition, Color::Red);
+
+		std::stringstream helpStream;
+		helpStream << "How To Play";
+		SpriteBatch::DrawString(helpStream.str().c_str(), _helpStringPosition, Color::Red);
+
+		std::stringstream quitStream;
+		quitStream << "Quit";
+		SpriteBatch::DrawString(quitStream.str().c_str(), _quitStringPosition, Color::Red);
+
+		
 	}
 
 	if (_startmenu)
 	{
 		SpriteBatch::Draw(_startBackground, _menuRectangle, nullptr);
-
 		_arrowPos->Y += _arrowOffset;
 		_arrowOffset = 0;
 
@@ -444,6 +503,8 @@ void Pacman::Draw(int elapsedTime)
 	// Help menu
 	if (_helpmenu)
 	{
+		SpriteBatch::Draw(_startBackground, _menuRectangle, nullptr);
+
 		SpriteBatch::Draw(_c1Texture, _c1Rect, nullptr);
 		SpriteBatch::Draw(_c2Texture, _c2Rect, nullptr);
 		SpriteBatch::Draw(_c3Texture, _c3Rect, nullptr);
