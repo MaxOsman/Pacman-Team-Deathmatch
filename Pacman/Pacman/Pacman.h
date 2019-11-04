@@ -87,7 +87,6 @@ private:
 	bool _dirKeyDown;
 	bool _retKeyDown;
 	signed int _arrowPlace;	//0 = start, 1 = help, 2 = quit
-	int _arrowOffset;
 	
 	// Position for String
 	Vector2* _stringPosition;

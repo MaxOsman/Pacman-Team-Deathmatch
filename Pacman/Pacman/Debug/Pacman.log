@@ -14,6 +14,6 @@ D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         with
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         [
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :             _Ty=S2D::Input::Keys
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         ]
-D:\Uni\Pacman\Pacman\Pacman.cpp(311,57): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-D:\Uni\Pacman\Pacman\Pacman.cpp(326,52): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(310,57): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(327,53): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Pacman.vcxproj -> D:\Uni\Pacman\Debug\Pacman.exe

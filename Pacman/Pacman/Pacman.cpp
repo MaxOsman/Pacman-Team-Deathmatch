@@ -94,7 +94,6 @@ void Pacman::LoadContent()
 	_spacePos = new Vector2((Graphics::GetViewportWidth() / 2) - 100.0f, Graphics::GetViewportHeight() - 50.0f);
 
 	_arrowPlace = 0;
-	_arrowOffset = 0;
 
 	// Load Pacman
 	_pacmanTexture[0] = new Texture2D();
@@ -252,7 +251,7 @@ void Pacman::CheckViewportCollision()
 
 void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
 {
-	if (state->IsKeyDown(Input::Keys::W) || state->IsKeyDown(Input::Keys::A) || state->IsKeyDown(Input::Keys::S) || state->IsKeyDown(Input::Keys::D))
+	if ((state->IsKeyDown(Input::Keys::W) || state->IsKeyDown(Input::Keys::A) || state->IsKeyDown(Input::Keys::S) || state->IsKeyDown(Input::Keys::D)) && !_paused)
 	{
 		_pacmanCurrentFrameTime[0] += elapsedTime;
 		if (_pacmanCurrentFrameTime[0] > _cPacmanFrameTime)
@@ -265,7 +264,7 @@ void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
 		}
 	}
 
-	if (state->IsKeyDown(Input::Keys::I) || state->IsKeyDown(Input::Keys::J) || state->IsKeyDown(Input::Keys::K) || state->IsKeyDown(Input::Keys::L))
+	if ((state->IsKeyDown(Input::Keys::I) || state->IsKeyDown(Input::Keys::J) || state->IsKeyDown(Input::Keys::K) || state->IsKeyDown(Input::Keys::L)) && !_paused)
 	{
 		_pacmanCurrentFrameTime[1] += elapsedTime;
 		if (_pacmanCurrentFrameTime[1] > _cPacmanFrameTime)
@@ -278,7 +277,7 @@ void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
 		}
 	}
 
-	if (state->IsKeyDown(Input::Keys::UP) || state->IsKeyDown(Input::Keys::LEFT) || state->IsKeyDown(Input::Keys::DOWN) || state->IsKeyDown(Input::Keys::RIGHT))
+	if ((state->IsKeyDown(Input::Keys::UP) || state->IsKeyDown(Input::Keys::LEFT) || state->IsKeyDown(Input::Keys::DOWN) || state->IsKeyDown(Input::Keys::RIGHT)) && !_paused)
 	{
 		_pacmanCurrentFrameTime[2] += elapsedTime;
 		if (_pacmanCurrentFrameTime[2] > _cPacmanFrameTime)
@@ -291,7 +290,7 @@ void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
 		}
 	}
 
-	if (state->IsKeyDown(Input::Keys::NUMPAD5) || state->IsKeyDown(Input::Keys::NUMPAD1) || state->IsKeyDown(Input::Keys::NUMPAD2) || state->IsKeyDown(Input::Keys::NUMPAD3))
+	if ((state->IsKeyDown(Input::Keys::NUMPAD5) || state->IsKeyDown(Input::Keys::NUMPAD1) || state->IsKeyDown(Input::Keys::NUMPAD2) || state->IsKeyDown(Input::Keys::NUMPAD3)) && !_paused)
 	{
 		_pacmanCurrentFrameTime[3] += elapsedTime;
 		if (_pacmanCurrentFrameTime[3] > _cPacmanFrameTime)
@@ -314,16 +313,19 @@ void Pacman::UpdatePacman(int elapsedTime, Input::KeyboardState* state)
 
 void Pacman::UpdateMunchie(int elapsedTime)
 {
-	_munchieCurrentFrameTime += elapsedTime;
-	if (_munchieCurrentFrameTime > _cMunchieFrameTime)
+	if (!_paused)
 	{
-		_munchieFrame++;
-		if (_munchieFrame >= 2)
-			_munchieFrame = 0;
+		_munchieCurrentFrameTime += elapsedTime;
+		if (_munchieCurrentFrameTime > _cMunchieFrameTime)
+		{
+			_munchieFrame++;
+			if (_munchieFrame >= 2)
+				_munchieFrame = 0;
 
-		_munchieCurrentFrameTime = 0;
+			_munchieCurrentFrameTime = 0;
+		}
+		_munchieSourceRect->X = _munchieSourceRect->Width * _munchieFrame;
 	}
-	_munchieSourceRect->X = _munchieSourceRect->Width * _munchieFrame;
 }
 
 void Pacman::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
@@ -349,7 +351,6 @@ void Pacman::CheckStart(Input::KeyboardState* state)
 {
 	if (state->IsKeyDown(Input::Keys::S) && !_dirKeyDown && !_retKeyDown)
 	{
-		_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
 		if (_arrowPlace >= 2)
 		{
 			_arrowPlace = 0;
@@ -359,12 +360,10 @@ void Pacman::CheckStart(Input::KeyboardState* state)
 			_arrowPlace++;
 		}
 		_dirKeyDown = true;
-		_arrowOffset = 64 * _arrowPlace;
 	}
 
 	if (state->IsKeyDown(Input::Keys::W) && !_dirKeyDown)
 	{
-		_arrowPos->Y = (Graphics::GetViewportHeight() / 2.0f) + 48;
 		if (_arrowPlace <= 0)
 		{
 			_arrowPlace = 2;
@@ -374,7 +373,6 @@ void Pacman::CheckStart(Input::KeyboardState* state)
 			_arrowPlace--;
 		}
 		_dirKeyDown = true;
-		_arrowOffset = 64 * _arrowPlace;
 	}
 
 	if (state->IsKeyUp(Input::Keys::W) && state->IsKeyUp(Input::Keys::S))
@@ -390,7 +388,7 @@ void Pacman::CheckStart(Input::KeyboardState* state)
 		}
 		else if (_arrowPlace == 1)
 			_helpmenu = true;
-		if (_arrowPlace == 2)
+		else if (_arrowPlace == 2)
 			Graphics::Destroy();
 
 		_retKeyDown = true;
@@ -450,8 +448,7 @@ void Pacman::Draw(int elapsedTime)
 		SpriteBatch::Draw(_menuBackground, _menuRectangle, nullptr);
 
 		SpriteBatch::Draw(_arrowTexture, _arrowPos, _arrowSourceRect);
-		_arrowPos->Y += _arrowOffset;
-		_arrowOffset = 0;
+		_arrowPos->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
 
 		std::stringstream titleStream;
 		titleStream << "-PAUSED-";
@@ -468,15 +465,12 @@ void Pacman::Draw(int elapsedTime)
 		std::stringstream quitStream;
 		quitStream << "Quit";
 		SpriteBatch::DrawString(quitStream.str().c_str(), _quitStringPosition, Color::Red);
-
-		
 	}
 
 	if (_startmenu)
 	{
 		SpriteBatch::Draw(_startBackground, _menuRectangle, nullptr);
-		_arrowPos->Y += _arrowOffset;
-		_arrowOffset = 0;
+		_arrowPos->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
 
 		if (!_helpmenu)
 		{
