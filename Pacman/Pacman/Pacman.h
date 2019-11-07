@@ -14,6 +14,33 @@
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
 
+struct Player
+{
+	float speedMultiplier; 
+	int currentFrameTime; 
+	int direction; 
+	int frame; 
+	Rect* sourceRect; 
+	Texture2D* texture; 
+	Vector2* position;
+};
+
+struct Collectable
+{
+	int currentFrameTime;
+	int frame;
+	Vector2* position;
+	Rect* sourceRect;
+	Texture2D* texture;
+};
+
+struct Graphic
+{
+	Vector2* pos;
+	Rect* sourceRect;
+	Texture2D* texture;
+};
+
 // Declares the Pacman class which inherits from the Game class.
 // This allows us to overload the Game class methods to help us
 // load content, draw and update our game.
@@ -30,45 +57,33 @@ private:
 	void UpdateMunchie(int elapsedTime);
 
 
-	// Data to represent Pacman
-	Vector2* _pacmanPosition[4];
-	Rect* _pacmanSourceRect[4];
-	Texture2D* _pacmanTexture[4];
-	Vector2* _arrowPos;
-	Rect* _arrowSourceRect;
-	Texture2D* _arrowTexture;
+	// Arrow data
+	Graphic* _arrow;
 
 	//Pacman data
-	int _pacmanDir[4];	//0 = right, 1 = down, 2 = left, 3 = up
-	const float _cPacmanSpeed;
-	int _pacmanFrame[4];
-	int _pacmanCurrentFrameTime[4];
+	Player *_pacman[4];
 	const int _cPacmanFrameTime;
 
 	//Munchie data
+	Collectable  *_munchie;
 	const int _cMunchieFrameTime;
-	int _munchieCurrentFrameTime;
-	int _munchieFrame;
-
-	Vector2* _munchiePosition;
-	Rect* _munchieSourceRect;
-	Texture2D* _munchieTexture;
 
 	//Menu data
 	bool _paused;
 	bool _startmenu;
 	bool _helpmenu;
-	Texture2D* _menuBackground;
-	Texture2D* _startBackground;
+	Graphic* _menu;
+	Graphic* _start;
 
-	Texture2D* _c1Texture;
-	Rect* _c1Rect;
-	Texture2D* _c2Texture;
-	Rect* _c2Rect;
-	Texture2D* _c3Texture;
-	Rect* _c3Rect;
-	Texture2D* _c4Texture;
-	Rect* _c4Rect;
+	Graphic* _controls[4];
+	//Texture2D* _c1Texture;
+	//Rect* _c1Rect;
+	//Texture2D* _c2Texture;
+	//Rect* _c2Rect;
+	//Texture2D* _c3Texture;
+	//Rect* _c3Rect;
+	//Texture2D* _c4Texture;
+	//Rect* _c4Rect;
 
 	Rect* _menuRectangle;
 	Vector2* _menuStringPosition;
