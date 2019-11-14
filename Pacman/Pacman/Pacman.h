@@ -19,9 +19,10 @@ using namespace S2D;
 struct Player
 {
 	float speedMultiplier; 
-	int currentFrameTime, 
-	    direction,			//0=right, 1=down, 2=left, 3=up
-	    frame; 
+	int currentFrameTime,
+		direction,			//0=right, 1=down, 2=left, 3=up
+		frame;
+	bool dirHeld[4];
 	Rect* sourceRect; 
 	Texture2D* texture; 
 	Vector2* position;
@@ -58,7 +59,7 @@ private:
 	void UpdatePacman(int elapsedTime, Input::KeyboardState* state);
 	void UpdateMunchie(int elapsedTime);
 	bool MunchieCollisionDetection(float pacx, float pacy, float pacwidth, float pacheight, float munchx, float munchy, float munchwidth, float munchheight);
-	int PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2);									//0=none, 1=block, 2=kill
+	int PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2, int dir1, int dir2, bool* dirHeld);									//0=none, 1=block, 2=kill
 
 	//Pacman data
 	Player *_pacman[4];

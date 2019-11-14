@@ -100,7 +100,7 @@ bool Pacman::MunchieCollisionDetection(float pacx, float pacy, float pacwidth, f
 	return true;
 }
 
-int Pacman::PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2)
+int Pacman::PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2, int dir1, int dir2, bool* dirHeld)
 {
 	float left1 = x1;
 	float left2 = x2;
@@ -111,16 +111,26 @@ int Pacman::PacmanCollisionDetection(float x1, float y1, float width1, float hei
 	float bottom1 = y1 + height1;
 	float bottom2 = y2 + height2;
 
-	if (bottom1 > top2 && )
-		return true;
-	if (top1 < bottom2)
-		return true;
-	if (right1 > left2)
-		return true;
-	if (left1 < right2)
-		return true;
+	//1 is being blocked, 2 is blocker
+	//-1 = none,  0 = right, 1 = down, 2 = left, 3 = up, 4 = kill
 
-	return false;
+	if (bottom1 < top2)
+		return -1;
+	if (top1 > bottom2)
+		return -1;
+	if (right1 < left2)
+		return -1;
+	if (left1 > right2)
+		return -1;
+
+	if (bottom1 > top2 && dirHeld[1] == true)
+		return 1;
+	if (top1 < bottom2 && dirHeld[3] == true)
+		return 3;
+	if (right1 > left2 && dirHeld[0] == true)
+		return 0;
+	if (left1 < right2 && dirHeld[2] == true)
+		return 2;
 }
 
 void Pacman::LoadContent()
@@ -129,6 +139,12 @@ void Pacman::LoadContent()
 	for (int i = 0; i < 4; i++)
 	{
 		_controls[i]->texture = new Texture2D();
+		_pacman[i]->currentFrameTime = 0;
+		_pacman[i]->frame = 0;
+		for (int j = 0; j < 4; j++)
+		{
+			_pacman[i]->dirHeld[j] = false;
+		}
 	}
 	_controls[0]->texture->Load("Textures/controls1.tga", false);
 	_controls[1]->texture->Load("Textures/controls2.tga", false);
@@ -188,12 +204,6 @@ void Pacman::LoadContent()
 	_pacman[3]->texture->Load("Textures/Pacman_Blue.tga", false);
 	_pacman[3]->position = new Vector2(Graphics::GetViewportWidth() - 350.0f, Graphics::GetViewportHeight() - 350.0f);
 	_pacman[3]->sourceRect = new Rect(0.0f, 0.0f, 27, 27);
-
-	for (int i = 0; i < 4; i++)
-	{
-		_pacman[i]->currentFrameTime = 0;
-		_pacman[i]->frame = 0;
-	}
 	
 	// Load Munchie
 
@@ -217,26 +227,38 @@ void Pacman::LoadContent()
 
 void Pacman::Input(int elapsedTime, Input::KeyboardState* state) 
 {
+	for (int i = 0; i < 4; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			_pacman[i]->dirHeld[j] = false;
+		}
+	}
+	
 	// Checks if key is pressed, Pac1
 	if (state->IsKeyDown(Input::Keys::W))
 	{
 		_pacman[0]->position->Y -= _pacman[0]->speedMultiplier * elapsedTime; //Moves Pacman across Y axis
 		_pacman[0]->direction = 3;
+		_pacman[0]->dirHeld[3] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::A))
 	{
 		_pacman[0]->position->X -= _pacman[0]->speedMultiplier * elapsedTime; //Moves Pacman across X axis
 		_pacman[0]->direction = 2;
+		_pacman[0]->dirHeld[2] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::S))
 	{
 		_pacman[0]->position->Y += _pacman[0]->speedMultiplier * elapsedTime; //Moves Pacman across Y axis
 		_pacman[0]->direction = 1;
+		_pacman[0]->dirHeld[1] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::D))
 	{
 		_pacman[0]->position->X += _pacman[0]->speedMultiplier * elapsedTime; //Moves Pacman across X axis
 		_pacman[0]->direction = 0;
+		_pacman[0]->dirHeld[0] = true;
 	}
 
 	// Checks if key is pressed, Pac2
@@ -244,21 +266,25 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 	{
 		_pacman[1]->position->Y -= _pacman[1]->speedMultiplier * elapsedTime;
 		_pacman[1]->direction = 3;
+		_pacman[1]->dirHeld[3] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::J))
 	{
 		_pacman[1]->position->X -= _pacman[1]->speedMultiplier * elapsedTime;
 		_pacman[1]->direction = 2;
+		_pacman[1]->dirHeld[2] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::K))
 	{
 		_pacman[1]->position->Y += _pacman[1]->speedMultiplier * elapsedTime;
 		_pacman[1]->direction = 1;
+		_pacman[1]->dirHeld[1] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::L))
 	{
 		_pacman[1]->position->X += _pacman[1]->speedMultiplier * elapsedTime;
 		_pacman[1]->direction = 0;
+		_pacman[1]->dirHeld[0] = true;
 	}
 
 	// Checks if key is pressed, Pac3
@@ -266,21 +292,25 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 	{
 		_pacman[2]->position->Y -= _pacman[2]->speedMultiplier * elapsedTime;
 		_pacman[2]->direction = 3;
+		_pacman[2]->dirHeld[3] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::LEFT))
 	{
 		_pacman[2]->position->X -= _pacman[2]->speedMultiplier * elapsedTime;
 		_pacman[2]->direction = 2;
+		_pacman[2]->dirHeld[2] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::DOWN))
 	{
 		_pacman[2]->position->Y += _pacman[2]->speedMultiplier * elapsedTime;
 		_pacman[2]->direction = 1;
+		_pacman[2]->dirHeld[1] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::RIGHT))
 	{
 		_pacman[2]->position->X += _pacman[2]->speedMultiplier * elapsedTime;
 		_pacman[2]->direction = 0;
+		_pacman[2]->dirHeld[0] = true;
 	}
 
 	// Checks if key is pressed, Pac4
@@ -288,21 +318,25 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 	{
 		_pacman[3]->position->Y -= _pacman[3]->speedMultiplier * elapsedTime;
 		_pacman[3]->direction = 3;
+		_pacman[3]->dirHeld[3] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::NUMPAD1))
 	{
 		_pacman[3]->position->X -= _pacman[3]->speedMultiplier * elapsedTime;
 		_pacman[3]->direction = 2;
+		_pacman[3]->dirHeld[2] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::NUMPAD2))
 	{
 		_pacman[3]->position->Y += _pacman[3]->speedMultiplier * elapsedTime;
 		_pacman[3]->direction = 1;
+		_pacman[3]->dirHeld[1] = true;
 	}
 	else if (state->IsKeyDown(Input::Keys::NUMPAD3))
 	{
 		_pacman[3]->position->X += _pacman[3]->speedMultiplier * elapsedTime;
 		_pacman[3]->direction = 0;
+		_pacman[3]->dirHeld[0] = true;
 	}
 }
 
@@ -417,12 +451,12 @@ void Pacman::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
 	if (state->IsKeyDown(pauseKey) && !_pKeyDown && !_helpmenu)
 	{
 		_pKeyDown = true;
-		_paused = !_paused;
+_paused = !_paused;
 	}
 	else if (state->IsKeyUp(pauseKey) && !_helpmenu)
 	{
-		_pKeyDown = false;
-		CheckStart(state);
+	_pKeyDown = false;
+	CheckStart(state);
 	}
 
 	if (state->IsKeyDown(Input::Keys::SPACE) && _helpmenu)
@@ -488,29 +522,48 @@ void Pacman::Update(int elapsedTime)
 	{
 		if (!_paused)
 		{
+			for (int i = 0; i < 4; i++)	//Each pacman
+			{
+				for (int j = 0; j < 4; j++)		//Checked for collision with all other pacmans
+				{
+					if (i != j)		//Dont check for collision with itself
+					{
+						if (PacmanCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _pacman[j]->position->X, _pacman[j]->position->Y, 27, 27, _pacman[i]->direction, _pacman[j]->direction, _pacman[i]->dirHeld) == 0)
+						{
+							_pacman[i]->position->X = _pacman[j]->position->X - _pacman[i]->sourceRect->Width - 1;
+						}
+						if (PacmanCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _pacman[j]->position->X, _pacman[j]->position->Y, 27, 27, _pacman[i]->direction, _pacman[j]->direction, _pacman[i]->dirHeld) == 1)
+						{
+							_pacman[i]->position->Y = _pacman[j]->position->Y - _pacman[i]->sourceRect->Height - 1;
+						}
+						if (PacmanCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _pacman[j]->position->X, _pacman[j]->position->Y, 27, 27, _pacman[i]->direction, _pacman[j]->direction, _pacman[i]->dirHeld) == 2)
+						{
+							_pacman[i]->position->X = _pacman[j]->position->X + _pacman[i]->sourceRect->Width + 1;
+						}
+						if (PacmanCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _pacman[j]->position->X, _pacman[j]->position->Y, 27, 27, _pacman[i]->direction, _pacman[j]->direction, _pacman[i]->dirHeld) == 3)
+						{
+							_pacman[i]->position->Y = _pacman[j]->position->Y + _pacman[i]->sourceRect->Height + 1;
+						}
+					}
+				}
+			}
 			Input(elapsedTime, keyboardState);
 			CheckViewportCollision();
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < MUNCHIECOUNT; j++)
+				{
+					if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _munchie[j]->position->X, _munchie[j]->position->Y, 12, 12) == true)
+					{
+						_munchie[j]->position->X = -200;
+					}
+				}
+			}
+			
 		}
 
 		UpdatePacman(elapsedTime, keyboardState);
 		UpdateMunchie(elapsedTime);
-		for (int i = 0; i < 4; i++)
-		{
-			for (int j = 0; j < MUNCHIECOUNT; j++)
-			{
-				if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, _munchie[j]->position->X, _munchie[j]->position->Y, 12, 12) == true)
-				{
-					_munchie[j]->position->X = -200;
-				}
-			}
-		}
-		for (int i = 0; i < 4; i++)
-		{
-			if (PacmanCollisionDetection() == true)
-			{
-
-			}
-		}
 		CheckPaused(keyboardState, Input::Keys::P);
 	}
 	else if(!_helpmenu)
