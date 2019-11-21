@@ -22,10 +22,11 @@ struct Player
 	int currentFrameTime,
 		direction,			//0=right, 1=down, 2=left, 3=up
 		frame;
-	bool dirHeld[4];
 	Rect* sourceRect; 
 	Texture2D* texture; 
 	Vector2* position;
+	bool canInput[4];				//1st = pacman, 2nd = direction.
+	bool canAnimate;
 };
 
 struct Collectable
@@ -44,6 +45,17 @@ struct Graphic
 	Texture2D* texture;
 };
 
+struct Tile
+{
+	Texture2D* Texture;
+
+	static const int width;
+	static const int height;
+	bool isSolid;
+
+	Tile(Texture2D* texture, bool isSolid);
+};
+
 // Declares the Pacman class which inherits from the Game class.
 // This allows us to overload the Game class methods to help us
 // load content, draw and update our game.
@@ -53,13 +65,13 @@ private:
 
 	//Methods
 	void Input(int elapsedTime, Input::KeyboardState* state);
+	void InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys upKey, Input::Keys leftKey, Input::Keys downKey, Input::Keys rightKey, int pacNum);
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckStart(Input::KeyboardState* state);
 	void CheckViewportCollision();
 	void UpdatePacman(int elapsedTime, Input::KeyboardState* state);
 	void UpdateMunchie(int elapsedTime);
 	bool MunchieCollisionDetection(float pacx, float pacy, float pacwidth, float pacheight, float munchx, float munchy, float munchwidth, float munchheight);
-	int PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2, int dir1, int dir2, bool* dirHeld);									//0=none, 1=block, 2=kill
 
 	//Pacman data
 	Player *_pacman[4];
@@ -102,6 +114,14 @@ private:
 	
 	// Position for String
 	Vector2* _stringPosition;
+
+	//Tiles
+	void LoadTiles(int levelIndex);
+	Tile* LoadTile(const char tileType, int x, int y);
+	Tile* LoadWallTile(const char* name);
+	Tile* LoadStartTile(int player, int x, int y);
+	Tile* LoadPowerupTile(const char* name, int x, int y);
+	Tile* tiles[56][56];
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>

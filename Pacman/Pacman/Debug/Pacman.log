@@ -1,22 +1,21 @@
 ﻿  Pacman.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\include\vector(1638): warning C4251: 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>::_Mypair': class 'std::_Compressed_pair<std::allocator<_Ty>,std::_Vector_val<std::_Simple_types<_Ty>>,true>' needs to have dll-interface to be used by clients of class 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>'
-          with
-          [
-              _Ty=S2D::Input::Keys
-          ]
-  C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.20.27508\include\vector(1638): note: see declaration of 'std::_Compressed_pair<std::allocator<_Ty>,std::_Vector_val<std::_Simple_types<_Ty>>,true>'
-          with
-          [
-              _Ty=S2D::Input::Keys
-          ]
-  C:\Users\o010617j\Desktop\Pacman\Pacman\S2D\Input.h(108): note: see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>' being compiled
-          with
-          [
-              _Ty=S2D::Input::Keys
-          ]
-C:\Users\o010617j\Desktop\Pacman\Pacman\Pacman.cpp(54): warning C4154: deletion of an array expression; conversion to pointer supplied
-C:\Users\o010617j\Desktop\Pacman\Pacman\Pacman.cpp(62): warning C4154: deletion of an array expression; conversion to pointer supplied
-C:\Users\o010617j\Desktop\Pacman\Pacman\Pacman.cpp(425): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\o010617j\Desktop\Pacman\Pacman\Pacman.cpp(444): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-C:\Users\o010617j\Desktop\Pacman\Pacman\Pacman.cpp(134): warning C4715: 'Pacman::PacmanCollisionDetection': not all control paths return a value
-  Pacman.vcxproj -> C:\Users\o010617j\Desktop\Pacman\Debug\Pacman.exe
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706,1): warning C4251: 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>::_Mypair': class 'std::_Compressed_pair<std::allocator<_Ty>,std::_Vector_val<std::_Simple_types<_Ty>>,true>' needs to have dll-interface to be used by clients of class 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706,1): warning C4251:         with
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706,1): warning C4251:         [
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706,1): warning C4251:             _Ty=S2D::Input::Keys
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706,1): warning C4251:         ]
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706): message : see declaration of 'std::_Compressed_pair<std::allocator<_Ty>,std::_Vector_val<std::_Simple_types<_Ty>>,true>'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706): message :         with
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706): message :         [
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706): message :             _Ty=S2D::Input::Keys
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.23.28105\include\vector(1706): message :         ]
+D:\Uni\Pacman\Pacman\S2D\Input.h(108): message : see reference to class template instantiation 'std::vector<S2D::Input::Keys,std::allocator<_Ty>>' being compiled
+D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         with
+D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         [
+D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :             _Ty=S2D::Input::Keys
+D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         ]
+D:\Uni\Pacman\Pacman\Pacman.cpp(59,18): warning C4154: deletion of an array expression; conversion to pointer supplied
+D:\Uni\Pacman\Pacman\Pacman.cpp(67,19): warning C4154: deletion of an array expression; conversion to pointer supplied
+D:\Uni\Pacman\Pacman\Pacman.cpp(468,61): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(487,64): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Pacman.vcxproj -> D:\Uni\Pacman\Debug\Pacman.exe
