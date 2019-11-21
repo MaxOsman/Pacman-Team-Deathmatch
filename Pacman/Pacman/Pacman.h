@@ -8,7 +8,7 @@
 	#endif
 #endif
 
-#define MUNCHIECOUNT 50
+#define MUNCHIECOUNT 500
 
 // Just need to include main header file
 #include "S2D/S2D.h"
@@ -48,12 +48,9 @@ struct Graphic
 struct Tile
 {
 	Texture2D* Texture;
-
-	static const int width;
-	static const int height;
 	bool isSolid;
 
-	Tile(Texture2D* texture, bool isSolid);
+	/*Tile(Texture2D* texture, bool isSolid);*/
 };
 
 // Declares the Pacman class which inherits from the Game class.
@@ -73,6 +70,8 @@ private:
 	void UpdateMunchie(int elapsedTime);
 	bool MunchieCollisionDetection(float pacx, float pacy, float pacwidth, float pacheight, float munchx, float munchy, float munchwidth, float munchheight);
 
+	Tile* temp_func();
+
 	//Pacman data
 	Player *_pacman[4];
 	const int _cPacmanFrameTime;
@@ -83,6 +82,9 @@ private:
 	//Munchie data
 	Collectable  *_munchie[MUNCHIECOUNT];
 	const int _cMunchieFrameTime;
+
+	//Powerup data
+	Collectable* _powerup[4];
 
 	//Menu data
 	bool _paused,
@@ -117,11 +119,17 @@ private:
 
 	//Tiles
 	void LoadTiles(int levelIndex);
+	Tile* LoadTile(const char* name, bool isSolid);
 	Tile* LoadTile(const char tileType, int x, int y);
-	Tile* LoadWallTile(const char* name);
+	Tile* LoadVarietyTile(const char* baseName, bool isSolid);
 	Tile* LoadStartTile(int player, int x, int y);
-	Tile* LoadPowerupTile(const char* name, int x, int y);
+	Tile* LoadPowerupTile(const char* name, int x, int y, bool isSolid);		
+	Tile* LoadMunchieTile(int x, int y);
 	Tile* tiles[56][56];
+	void DrawTiles();
+	static const int Width;
+	static const int Height;
+	/*static const*/ Vector2* Size;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>

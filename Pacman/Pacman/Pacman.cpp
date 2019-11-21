@@ -7,10 +7,7 @@
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250), _cMunchieFrameTime(500)
 {
-	//_pacman[0] = new Player(new Vector2(350.0f, 350.0f));
-	//_pacman[1] = new Player(new Vector2(Graphics::GetViewportWidth() - 350.0f, 350.0f));
-	//_pacman[2] = new Player(new Vector2(350.0f, Graphics::GetViewportHeight() - 350.0f));
-	//_pacman[3] = new Player(new Vector2(Graphics::GetViewportWidth() - 350.0f, Graphics::GetViewportHeight() - 350.0f));
+	LoadTiles(0);
 
 	for (int i = 0; i < 4; i++)
 	{
@@ -23,6 +20,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 			_pacman[i]->canInput[j] = true;
 		}
 		_controls[i] = new Graphic();
+		_powerup[i] = new Collectable();
 	}
 
 	for (int i = 0; i < MUNCHIECOUNT; i++)
@@ -41,6 +39,11 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 	_retKeyDown = false;
 	_teamScores[0] = 0;
 	_teamScores[1] = 0;
+
+	const int Width = 16;
+	const int Height = 16;
+
+	const Vector2* Size = new Vector2((float)Width, (float)Height);
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 1024, false, 25, 25, "Pacman", 60);
@@ -93,34 +96,37 @@ Tile* Pacman::LoadTile(const char tileType, int x, int y)
 	switch (tileType)
 	{
 		case '.':
-			return new Tile(nullptr, false);		// Blank space
+				
+			return temp_func();								// Blank space
 
 		case '|':
-			return LoadWallTile("Vertical");		// Vertical
+			return LoadVarietyTile("Vertical", true);		// Vertical
 		
 		case '-':
-			return LoadWallTile("Horizontal");		// Horizontal
+			return LoadVarietyTile("Horizontal", true);		// Horizontal
 
 		case '[':
-			return LoadWallTile("TopLeft");			// TopLeft
+			return LoadVarietyTile("TopLeft", true);			// TopLeft
 
 		case ']':
-			return LoadWallTile("TopRight");		// TopRight
+			return LoadVarietyTile("TopRight", true);		// TopRight
 
 		case '{':
-			return LoadWallTile("BottomLeft");		// BottomLeft
+			return LoadVarietyTile("BottomLeft", true);		// BottomLeft
 
 		case '}':
-			return LoadWallTile("BottomLeft");		// BottomLeft
+			return LoadVarietyTile("BottomLeft", true);		// BottomLeft
 
+		case '#':
+			return LoadMunchieTile(x, y);		// Munchie
 		case 'A':
-			return LoadPowerupTile("", x, y);		// Powerups
+			return LoadPowerupTile("", x, y, false);		// Powerups
 		case 'B':
-			return LoadPowerupTile("", x, y);
+			return LoadPowerupTile("", x, y, false);
 		case 'C':
-			return LoadPowerupTile("", x, y);
+			return LoadPowerupTile("", x, y, false);
 		case 'D':
-			return LoadPowerupTile("", x, y);
+			return LoadPowerupTile("", x, y, false);
 
 		case '0':
 			return LoadStartTile(0, x, y);			// Player 1 start point
@@ -134,6 +140,18 @@ Tile* Pacman::LoadTile(const char tileType, int x, int y)
 		return nullptr;
 	}
 }
+
+
+Tile* Pacman::temp_func()
+{
+	Tile* ptrRet = new Tile();
+
+	ptrRet->Texture = nullptr;
+	ptrRet->isSolid = false;
+
+	return ptrRet;
+}
+
 
 void Pacman::LoadTiles(int levelIndex)
 {
@@ -152,8 +170,6 @@ void Pacman::LoadTiles(int levelIndex)
 	while (!stream.eof())
 	{
 		lines->push_back(*sline);
-		if (sline->size() != width)
-			//cout << "Bad Level Load\n";
 		stream.getline(line, 256);
 		delete sline;
 		sline = new string(line);
@@ -162,24 +178,23 @@ void Pacman::LoadTiles(int levelIndex)
 	delete[] line;
 	delete sline;
 
-	// Allocate the tile grid.
-	_tiles = new vector<vector<Tile*>>(width, vector<Tile*>(lines->size()));
-
 	// Loop over every tile position,
-	for (int y = 0; y < GetHeight(); ++y)
+	for (int y = 0; y < 56; ++y)
 	{
-		for (int x = 0; x < GetWidth(); ++x)
+		for (int x = 0; x < 56; ++x)
 		{
+
 			// to load each tile.
 			char tileType = lines->at(y)[x];
-			(*_tiles)[x][y] = LoadTile(tileType, x, y);
+			//(*_tiles)[x][y] = LoadTile(tileType, x, y);
+			tiles[x][y] = LoadTile(tileType, x, y);
 		}
 	}
 
 	delete lines;
 }
 
-Tile* Pacman::LoadWallTile(const char* name)
+Tile* Pacman::LoadTile(const char* name, bool isSolid)
 {
 	stringstream sstream;
 	sstream << "Tiles/" << name << ".bmp";
@@ -187,22 +202,61 @@ Tile* Pacman::LoadWallTile(const char* name)
 	Texture2D* texture = new Texture2D();
 	texture->Load(sstream.str().c_str(), true);
 
-	return new Tile(texture, true);
+	Tile* ptrRet = new Tile();
+
+	ptrRet->Texture = texture;
+	ptrRet->isSolid = isSolid;
+
+	return ptrRet;
+
+	/*return new Tile(texture, isSolid);*/
+}
+
+Tile* Pacman::LoadVarietyTile(const char* baseName, bool isSolid)
+{
+	stringstream sstream;
+	sstream << baseName;
+
+	return LoadTile(sstream.str().c_str(), isSolid);
 }
 
 Tile* Pacman::LoadStartTile(int player, int x, int y)
 {
-	_pacman[player]->position->X = x;
-	_pacman[player]->position->Y = y;
+	_pacman[player]->position->X = x*16;
+	_pacman[player]->position->Y = y*16;
 
-	return new Tile(nullptr, false);
+	Tile* ptrRet = new Tile();
+
+	ptrRet->Texture = nullptr;
+	ptrRet->isSolid = false;
+
+	return ptrRet;
 }
 
-Tile* Pacman::LoadPowerupTile(const char* name, int x, int y)
+Tile* Pacman::LoadPowerupTile(const char* baseName, int x, int y, bool isSolid)
 {
-	_gems.push_back(new Gem(this, x, y);
+	stringstream sstream;
+	sstream << baseName;
 
-	return new Tile(nullptr, false);
+	_powerup[((x + 1) * (y + 1)) - 1] = new Collectable();
+	_powerup[((x + 1) * (y + 1)) - 1]->position->X = x * 16;
+	_powerup[((x + 1) * (y + 1)) - 1]->position->Y = y * 16;
+
+	return LoadTile(sstream.str().c_str(), false);
+}
+
+Tile* Pacman::LoadMunchieTile(int x, int y)
+{
+	_munchie[((x + 1) * (y + 1)) - 1] = new Collectable();
+	_munchie[((x + 1) * (y + 1)) - 1]->position->X = x*16;
+	_munchie[((x + 1) * (y + 1)) - 1]->position->Y = y*16;
+
+	Tile* ptrRet = new Tile();
+
+	ptrRet->Texture = nullptr;
+	ptrRet->isSolid = false;
+
+	return ptrRet;
 }
 
 bool Pacman::MunchieCollisionDetection(float pacx, float pacy, float pacwidth, float pacheight, float munchx, float munchy, float munchwidth, float munchheight)
@@ -227,39 +281,6 @@ bool Pacman::MunchieCollisionDetection(float pacx, float pacy, float pacwidth, f
 
 	return true;
 }
-
-/*signed int Pacman::PacmanCollisionDetection(float x1, float y1, float width1, float height1, float x2, float y2, float width2, float height2, int dir1, int dir2)
-{
-	float left1 = x1;
-	float left2 = x2;
-	float right1 = x1 + width1;
-	float right2 = x2 + width2;
-	float top1 = y1;
-	float top2 = y2;
-	float bottom1 = y1 + height1;
-	float bottom2 = y2 + height2;
-
-	//1 is being blocked, 2 is blocker
-	//-1 = none,  0 = right, 1 = down, 2 = left, 3 = up, 4 = kill
-
-	if (bottom1 < top2)
-		return -1;
-	if (top1 > bottom2)
-		return -1;
-	if (right1 < left2)
-		return -1;
-	if (left1 > right2)
-		return -1;
-
-	if (bottom1 > top2)
-		return 3;
-	if (top1 < bottom2)
-		return 1;
-	if (right1 > left2)
-		return 2;
-	if (left1 < right2)
-		return 0;
-}*/
 
 void Pacman::LoadContent()
 {
@@ -715,6 +736,25 @@ void Pacman::Update(int elapsedTime)
 	}
 }
 
+void Pacman::DrawTiles()
+{
+	for (int y = 0; y < 56; ++y)
+	{
+		for (int x = 0; x < 56; ++x)
+		{
+			// If there is a visible tile in that position
+			Texture2D* texture = tiles[x][y]->Texture;
+			if (texture != nullptr)
+			{
+				// Draw it in screen space.
+				Vector2 position((float)x, (float)y);
+				position *= *Size;
+				SpriteBatch::Draw(texture, &position);
+			}
+		}
+	}
+}
+
 void Pacman::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
@@ -727,6 +767,8 @@ void Pacman::Draw(int elapsedTime)
 	{
 		SpriteBatch::Draw(_pacman[i]->texture, _pacman[i]->position, _pacman[i]->sourceRect); // Draws Pacman
 	}
+
+	DrawTiles();		//Draws level
 	
 	// Draw Munchie
 	for (int i = 0; i < MUNCHIECOUNT; i++)
