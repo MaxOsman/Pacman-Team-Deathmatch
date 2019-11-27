@@ -21,3 +21,37 @@ for (int i = 0; i < 4; i++)
 56 by 56
 896 by 896
 
+
+
+
+/*int i = ((x + 1) * (y + 1)) - 1;
+	_munchie[i] = new Collectable();
+	_munchie[i]->sourceRect = new Rect(0.0f, 0.0f, 12, 12);
+	_munchie[i]->texture->Load("Textures/Munchies.png", false);
+	_munchie[i]->position = new Vector2(x * 16, y * 16);
+	_munchie[i]->currentFrameTime = 0;
+	_munchie[i]->frame = 0;*/
+
+/*int i = ((x + 1) * (y + 1)) - 1;
+	_powerup[i] = new Collectable();
+	_powerup[i]->sourceRect = new Rect(0.0f, 0.0f, 24, 24);
+	_powerup[i]->texture->Load("Textures/allcherries.png", false);
+	_powerup[i]->sourceRect->X = _powerup[((x + 1) * (y + 1)) - 1]->sourceRect->Width * type;
+	_powerup[i]->position = new Vector2(x * 16, y * 16);*/
+
+// Load Munchie
+
+	/*Texture2D* _munchieTexture = new Texture2D;
+	_munchieTexture->Load("Textures/Munchies.png", true);
+	Rect* _munchieRect = new Rect(0.0f, 0.0f, 12, 12);
+	for (int i = 0; i < MUNCHIECOUNT; i++)
+	{
+		_munchie[i]->texture = _munchieTexture;
+		_munchie[i]->position = new Vector2(100.0f, 450.0f);
+		_munchie[i]->sourceRect = _munchieRect;
+		_munchie[i]->currentFrameTime = 0;
+		_munchie[i]->frame = 0;
+	}*/
+
+	//_munchie[0]->position = new Vector2(100.0f, 450.0f);
+
