@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <stdio.h>
+#include <iostream>
 
 using namespace std;
 
@@ -32,6 +33,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 	_arrow = new Graphic();
 	_menu = new Graphic();
 	_start = new Graphic();
+	_target = new Graphic();
 	_paused = false;
 	_startmenu = true;
 	_helpmenu = false;
@@ -41,10 +43,12 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 	_teamScores[0] = 0;
 	_teamScores[1] = 0;
 	frozenTime = 0;
+	pacmanWithGreen = -1;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 992, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
+	Audio::Initialise();
 
 	LoadTiles(0);
 
@@ -63,7 +67,7 @@ Pacman::~Pacman()
 		delete _pacman[i]->position;
 		delete _controls[i]->texture;
 		delete _controls[i]->sourceRect;
-		delete _controls[i]->pos;
+		delete _controls[i]->position;
 	}
 	delete[] _pacman;
 	delete[] _controls;
@@ -79,18 +83,23 @@ Pacman::~Pacman()
 	}
 	delete _menu->texture;
 	delete _menu->sourceRect;
-	delete _menu->pos;
+	delete _menu->position;
 	delete _menu;
 
 	delete _start->texture;
 	delete _start->sourceRect;
-	delete _start->pos;
+	delete _start->position;
 	delete _start;
 
 	delete _arrow->texture;
-	delete _arrow->pos;
+	delete _arrow->position;
 	delete _arrow->sourceRect;
 	delete _arrow;
+
+	delete _target->texture;
+	delete _target->sourceRect;
+	delete _target->position;
+	delete _target;
 
 	delete _menuStringPosition;
 	delete _titleStringPosition;
@@ -106,6 +115,8 @@ Pacman::~Pacman()
 
 	delete _stringPosition;
 	delete _tiles;
+
+	delete _pop;
 }
 
 Tile* Pacman::LoadTile(char tileType, float x, float y)
@@ -298,7 +309,7 @@ void Pacman::LoadContent()
 	//Start menu assets
 	_arrow->texture = new Texture2D();
 	_arrow->texture->Load("Textures/arrow.png", false);
-	_arrow->pos = new Vector2((Graphics::GetViewportWidth() / 2.0f) + 128, (Graphics::GetViewportHeight() / 2.0f) + 48);
+	_arrow->position = new Vector2((Graphics::GetViewportWidth() / 2.0f) + 128, (Graphics::GetViewportHeight() / 2.0f) + 48);
 	_arrow->sourceRect = new Rect(0.0f, 0.0f, 16, 16);
 	_arrowPlace = 0;
 
@@ -310,15 +321,17 @@ void Pacman::LoadContent()
 	_start->texture->Load("Textures/Start.png", false);
 	_start->sourceRect = new Rect(0.0f, 0.0f, Graphics::GetViewportWidth(), Graphics::GetViewportHeight());
 
-	
-	
-	
-	
 	_menuStringPosition = new Vector2(Graphics::GetViewportWidth() / 2.0f, Graphics::GetViewportHeight() / 2.0f);
 	_titleStringPosition = new Vector2((Graphics::GetViewportWidth() / 2.0f)-64, (Graphics::GetViewportHeight() / 2.0f)-128);
 	_startStringPosition = new Vector2((Graphics::GetViewportWidth() / 2.0f)-128, (Graphics::GetViewportHeight() / 2.0f)+64);
 	_helpStringPosition = new Vector2((Graphics::GetViewportWidth() / 2.0f) - 128, (Graphics::GetViewportHeight() / 2.0f) + 128);
 	_quitStringPosition = new Vector2((Graphics::GetViewportWidth() / 2.0f) - 128, (Graphics::GetViewportHeight() / 2.0f) + 192);
+
+	//Target Data
+	_target->texture = new Texture2D();
+	_target->texture->Load("Textures/GreenTarget.png", false);
+	_target->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
+	_target->position = new Vector2(-200.0f, -200.0f);
 
 	//Text for help screen
 	_p1Pos = new Vector2(260.0f, 200.0f);
@@ -330,13 +343,10 @@ void Pacman::LoadContent()
 	// Load Pacmans
 	_pacman[0]->texture = new Texture2D();
 	_pacman[0]->texture->Load("Textures/Pacman_Red.tga", false);
-
 	_pacman[1]->texture = new Texture2D();
 	_pacman[1]->texture->Load("Textures/Pacman_Red.tga", false);
-
 	_pacman[2]->texture = new Texture2D();
 	_pacman[2]->texture->Load("Textures/Pacman_Blue.tga", false);
-
 	_pacman[3]->texture = new Texture2D();
 	_pacman[3]->texture->Load("Textures/Pacman_Blue.tga", false);
 
@@ -349,6 +359,22 @@ void Pacman::LoadContent()
 
 	// Set string position
 	_stringPosition = new Vector2(10.0f, 25.0f);
+
+	//Sounds
+	_pop = new SoundEffect();
+	_pop->Load("Sounds/pop.wav");
+}
+
+void Pacman::CanMoveSet(int pacNum, Dir dir, Input::Keys key, Input::KeyboardState* state)
+{
+	if (state->IsKeyDown(key) && _pacman[pacNum]->canInput[dir] == true)		//If up key is pressed, and if this pacman can input...
+	{
+		_pacman[pacNum]->direction = dir;
+	}
+	else if (state->IsKeyDown(key) && _pacman[pacNum]->canInput[dir] == false)
+	{
+		_pacman[pacNum]->canInput[dir] = true;
+	}
 }
 
 void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys upKey, Input::Keys leftKey, Input::Keys downKey, Input::Keys rightKey, int pacNum)
@@ -370,19 +396,18 @@ void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys 
 					_pacman[j]->canInput[_LEFT] = false;
 					_pacman[i]->canInput[_RIGHT] = false;
 				}
-				else if (_pacman[j]->direction == _DOWN && _pacman[i]->direction == _UP)
+				else if (_pacman[j]->direction == _DOWN && _pacman[i]->direction == _FORW)
 				{
 					_pacman[j]->canInput[_DOWN] = false;
-					_pacman[i]->canInput[_UP] = false;
+					_pacman[i]->canInput[_FORW] = false;
 				}
-				else if (_pacman[j]->direction == _UP && _pacman[i]->direction == _DOWN)
+				else if (_pacman[j]->direction == _FORW && _pacman[i]->direction == _DOWN)
 				{
-					_pacman[j]->canInput[_UP] = false;
+					_pacman[j]->canInput[_FORW] = false;
 					_pacman[i]->canInput[_DOWN] = false;
 				}
 
 				//"i" is the killer, "j" gets killed.
-				//IMPORTANT-COLLISION INCOMPLETE!!!
 				//Gets killed if killer is walking towards its back or sides
 				if (_pacman[j]->direction == _RIGHT && _pacman[i]->direction == _RIGHT && _pacman[i]->position->X < _pacman[j]->position->X)
 				{
@@ -392,7 +417,7 @@ void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys 
 				{
 					_pacman[j]->position->X = -666;
 				}
-				else if (_pacman[j]->direction == _RIGHT && _pacman[i]->direction == _UP && _pacman[i]->position->Y > _pacman[j]->position->Y)
+				else if (_pacman[j]->direction == _RIGHT && _pacman[i]->direction == _FORW && _pacman[i]->position->Y > _pacman[j]->position->Y)
 				{
 					_pacman[j]->position->X = -666;
 				}
@@ -418,20 +443,20 @@ void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys 
 				{
 					_pacman[j]->position->X = -666;
 				}
-				else if (_pacman[j]->direction == _LEFT && _pacman[i]->direction == _UP && _pacman[i]->position->Y > _pacman[j]->position->Y)
+				else if (_pacman[j]->direction == _LEFT && _pacman[i]->direction == _FORW && _pacman[i]->position->Y > _pacman[j]->position->Y)
 				{
 					_pacman[j]->position->X = -666;
 				}
 
-				if (_pacman[j]->direction == _UP && _pacman[i]->direction == _RIGHT && _pacman[i]->position->X < _pacman[j]->position->X)
+				if (_pacman[j]->direction == _FORW && _pacman[i]->direction == _RIGHT && _pacman[i]->position->X < _pacman[j]->position->X)
 				{
 					_pacman[j]->position->X = -666;
 				}
-				else if (_pacman[j]->direction == _UP && _pacman[i]->direction == _LEFT && _pacman[i]->position->X > _pacman[j]->position->X)
+				else if (_pacman[j]->direction == _FORW && _pacman[i]->direction == _LEFT && _pacman[i]->position->X > _pacman[j]->position->X)
 				{
 					_pacman[j]->position->X = -666;
 				}
-				else if (_pacman[j]->direction == _UP && _pacman[i]->direction == _UP && _pacman[i]->position->Y > _pacman[j]->position->Y)
+				else if (_pacman[j]->direction == _FORW && _pacman[i]->direction == _FORW && _pacman[i]->position->Y > _pacman[j]->position->Y)
 				{
 					_pacman[j]->position->X = -666;
 				}
@@ -439,38 +464,10 @@ void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys 
 		}
 	}
 
-	if (state->IsKeyDown(upKey) && _pacman[pacNum]->canInput[_UP] == true)		//If up key is pressed, and if this pacman can input...
-	{
-		_pacman[pacNum]->direction = _UP;
-	}
-	else if (state->IsKeyDown(upKey) && _pacman[pacNum]->canInput[_UP] == false)
-	{
-		_pacman[pacNum]->canInput[_UP] = true;
-	}
-	else if (state->IsKeyDown(leftKey) && _pacman[pacNum]->canInput[_LEFT] == true)
-	{
-		_pacman[pacNum]->direction = _LEFT;
-	}
-	else if (state->IsKeyDown(leftKey) && _pacman[pacNum]->canInput[_LEFT] == false)
-	{
-		_pacman[pacNum]->canInput[_LEFT] = true;
-	}
-	else if (state->IsKeyDown(downKey) && _pacman[pacNum]->canInput[_DOWN] == true)
-	{
-		_pacman[pacNum]->direction = _DOWN;
-	}
-	else if (state->IsKeyDown(downKey) && _pacman[pacNum]->canInput[_DOWN] == false)
-	{
-		_pacman[pacNum]->canInput[_DOWN] = true;
-	}
-	else if (state->IsKeyDown(rightKey) && _pacman[pacNum]->canInput[_RIGHT] == true)
-	{
-		_pacman[pacNum]->direction = _RIGHT;
-	}
-	else if (state->IsKeyDown(rightKey) && _pacman[pacNum]->canInput[_RIGHT] == false)
-	{
-		_pacman[pacNum]->canInput[_RIGHT] = true;
-	}
+	CanMoveSet(pacNum, _FORW, upKey, state);
+	CanMoveSet(pacNum, _LEFT, leftKey, state);
+	CanMoveSet(pacNum, _DOWN, downKey, state);
+	CanMoveSet(pacNum, _RIGHT, rightKey, state);
 }
 
 void Pacman::Input(int elapsedTime, Input::KeyboardState* state) 
@@ -483,25 +480,22 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 
 	for (int i = 0; i < 4; i++)
 	{
+		_pacman[i]->canAnimate = true;		//Put here once to save space
 		if (_pacman[i]->direction == _RIGHT && _pacman[i]->canInput[_RIGHT] == true)
 		{
 			_pacman[i]->position->X += _pacman[i]->speedMultiplier * elapsedTime; //Moves Pacman forward across X axis
-			_pacman[i]->canAnimate = true;
 		}
 		else if (_pacman[i]->direction == _DOWN && _pacman[i]->canInput[_DOWN] == true)
 		{
 			_pacman[i]->position->Y += _pacman[i]->speedMultiplier * elapsedTime; //Moves Pacman forward across Y axis
-			_pacman[i]->canAnimate = true;
 		}
 		else if (_pacman[i]->direction == _LEFT && _pacman[i]->canInput[_LEFT] == true)
 		{
 			_pacman[i]->position->X -= _pacman[i]->speedMultiplier * elapsedTime; //Moves Pacman back across X axis
-			_pacman[i]->canAnimate = true;
 		}
-		else if (_pacman[i]->direction == _UP && _pacman[i]->canInput[_UP] == true)
+		else if (_pacman[i]->direction == _FORW && _pacman[i]->canInput[_FORW] == true)	
 		{
 			_pacman[i]->position->Y -= _pacman[i]->speedMultiplier * elapsedTime; //Moves Pacman back across Y axis
-			_pacman[i]->canAnimate = true;
 		}
 		else
 		{
@@ -614,6 +608,17 @@ void Pacman::UpdateMunchie(int elapsedTime)
 {
 	if (!_paused)
 	{
+		munchieCurrentFrameTime += elapsedTime;
+		if (munchieCurrentFrameTime > _cMunchieFrameTime)
+		{
+			if (munchieFrame == 0)
+				munchieFrame = 1;
+			else if (munchieFrame == 1)
+				munchieFrame = 0;
+
+			munchieCurrentFrameTime = 1;
+		}
+
 		for (int j = 0; j < (int)_munchie.size(); ++j)
 		{
 			Collectable* tempMunch = _munchie[j];
@@ -720,10 +725,99 @@ void Pacman::BlueCherry(int i, int elapsedTime)
 	}
 }
 
+void Pacman::GreenCherry(int i, Input::MouseState* state)
+{
+	if (pacmanWithGreen != -1)
+	{
+		_target->position->X = state->X;
+		_target->position->Y = state->Y;
+	}
+	else
+	{
+		_target->position->X = -200;
+	}
+}
+
+void Pacman::MunchieCollInteraction(int i)
+{
+	//collision between munchie and pacman
+	for (int j = 0; j < (int)_munchie.size(); ++j)
+	{
+		Collectable* tempMunch = _munchie[j];
+		if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempMunch->position->X, tempMunch->position->Y, 12, 12) == true && tempMunch->collectedTime <= 0)
+		{
+			tempMunch->texture->Load("Textures/MunchiesEmpty.png", false);
+			tempMunch->collectedTime = 60;
+
+			/*std::cout << "Test." << std::endl;
+			if (!Audio::IsInitialised())
+			{
+				std::cout << "Not init." << std::endl;
+			}
+			if (!_pop->IsLoaded())
+			{
+				std::cout << "Not load." << std::endl;
+			}*/
+
+			Audio::Play(_pop);
+			if (i == 0 || i == 1)
+			{
+				_teamScores[RED]++;
+			}
+			else if (i == 2 || i == 3)
+			{
+				_teamScores[BLUE]++;
+			}
+		}
+	}
+}
+
+void Pacman::PowerupCollInteraction(int i)
+{
+	//collision between powerup and pacman
+	for (int j = 0; j < (int)_powerup.size(); ++j)
+	{
+		Collectable* tempPower = _powerup[j];
+		if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempPower->position->X, tempPower->position->Y, 24, 24) == true)
+		{
+			if (tempPower->type == 1)
+			{
+				_pacman[i]->speedCurrentFrameTime = 5000;
+				_pacman[i]->speedMultiplier = 0.4f;
+				_pacman[i]->currentFrameTime += 125;
+			}
+			else if (tempPower->type == 2)
+			{
+				if (i == 0 || i == 1)
+				{
+					_pacman[2]->speedMultiplier = 0.0f;
+					_pacman[3]->speedMultiplier = 0.0f;
+				}
+				else if (i == 2 || i == 3)
+				{
+					_pacman[0]->speedMultiplier = 0.0f;
+					_pacman[1]->speedMultiplier = 0.0f;
+				}
+				frozenTime = 5000;
+			}
+			else if (tempPower->type == 3)
+			{
+				pacmanWithGreen = i;
+			}
+			else if (tempPower->type == 4)
+			{
+
+			}
+			tempPower->position->X = -200;
+		}
+	}
+}
+
 void Pacman::Update(int elapsedTime)
 {
 	// Gets the current state of the keyboard
 	Input::KeyboardState* keyboardState = Input::Keyboard::GetState();
+	Input::MouseState* mouseState = Input::Mouse::GetState();
 
 	if (!_startmenu)
 	{
@@ -731,78 +825,14 @@ void Pacman::Update(int elapsedTime)
 		{
 			Input(elapsedTime, keyboardState);
 			CheckViewportCollision();
-
-			munchieCurrentFrameTime += elapsedTime;
-			if (munchieCurrentFrameTime > _cMunchieFrameTime)
-			{
-				if (munchieFrame == 0)
-					munchieFrame = 1;
-				else if (munchieFrame == 1)
-					munchieFrame = 0;
-
-					munchieCurrentFrameTime = 1;
-			}
 			
 			for (int i = 0; i < 4; i++)		//Collectable detection + action
 			{
 				RedCherry(i, elapsedTime);
 				BlueCherry(i, elapsedTime);
-
-				//collision between munchie and pacman
-				for (int j = 0; j < (int)_munchie.size(); ++j)
-				{
-					Collectable* tempMunch = _munchie[j];
-					if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempMunch->position->X, tempMunch->position->Y, 12, 12) == true)
-					{
-						tempMunch->texture->Load("Textures/MunchiesEmpty.png", false);
-						if (i == 0 || i == 1)
-						{
-							_teamScores[RED]++;
-						}
-						else if (i == 2 || i == 3)
-						{
-							_teamScores[BLUE]++;
-						}
-					}
-				}
-
-				//collision between powerup and pacman
-				for (int j = 0; j < (int)_powerup.size(); ++j)
-				{
-					Collectable* tempPower = _powerup[j];
-					if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempPower->position->X, tempPower->position->Y, 24, 24) == true)
-					{
-						if (tempPower->type == 1)
-						{
-							_pacman[i]->speedCurrentFrameTime = 5000;
-							_pacman[i]->speedMultiplier = 0.4f;
-							_pacman[i]->currentFrameTime += 125;
-						}
-						else if (tempPower->type == 2)
-						{
-							if (i == 0 || i == 1)
-							{
-								_pacman[2]->speedMultiplier = 0.0f;
-								_pacman[3]->speedMultiplier = 0.0f;
-							}
-							else if (i == 2 || i == 3)
-							{
-								_pacman[0]->speedMultiplier = 0.0f;
-								_pacman[1]->speedMultiplier = 0.0f;
-							}
-							frozenTime = 5000;
-						}
-						else if (tempPower->type == 3)
-						{
-
-						}
-						else if (tempPower->type == 4)
-						{
-
-						}
-						tempPower->position->X = -200;
-					}
-				}
+				GreenCherry(i, mouseState);
+				MunchieCollInteraction(i);
+				PowerupCollInteraction(i);
 			}
 		}
 
@@ -849,7 +879,7 @@ void Pacman::Draw(int elapsedTime)
 	stringstream stream;
 	
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	stream << _teamScores[RED] << "  " << _teamScores[BLUE];
+	stream << _pacman[0]->direction;
 
 	DrawTiles();		//Draws level
 	
@@ -870,6 +900,8 @@ void Pacman::Draw(int elapsedTime)
 	{
 		SpriteBatch::Draw(_pacman[i]->texture, _pacman[i]->position, _pacman[i]->sourceRect); // Draws Pacman
 	}
+
+	SpriteBatch::Draw(_target->texture, _target->position, _target->sourceRect);
 	
 	// Draws String
 	SpriteBatch::DrawString(stream.str().c_str(), _stringPosition, Color::Green);
@@ -879,8 +911,8 @@ void Pacman::Draw(int elapsedTime)
 	{
 		SpriteBatch::Draw(_menu->texture, _menu->sourceRect, nullptr);
 
-		SpriteBatch::Draw(_arrow->texture, _arrow->pos, _arrow->sourceRect);
-		_arrow->pos->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
+		SpriteBatch::Draw(_arrow->texture, _arrow->position, _arrow->sourceRect);
+		_arrow->position->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
 		
 		stream << "-PAUSED-";
 		SpriteBatch::DrawString(stream.str().c_str(), _titleStringPosition, Color::White);
@@ -902,11 +934,11 @@ void Pacman::Draw(int elapsedTime)
 	if (_startmenu)
 	{
 		SpriteBatch::Draw(_start->texture, _start->sourceRect, nullptr);
-		_arrow->pos->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
+		_arrow->position->Y = Graphics::GetViewportHeight() / 2.0f + 48 + (64 * _arrowPlace);
 
 		if (!_helpmenu)
 		{
-			SpriteBatch::Draw(_arrow->texture, _arrow->pos, _arrow->sourceRect);
+			SpriteBatch::Draw(_arrow->texture, _arrow->position, _arrow->sourceRect);
 			
 			stream << "PACMAN";
 			SpriteBatch::DrawString(stream.str().c_str(), _titleStringPosition, Color::White);
@@ -964,7 +996,7 @@ Collectable::Collectable(float x, float y, int isPowerup)
 {
 	texture = new Texture2D;
 	position = new Vector2(x * 32.0f, y * 32.0f);
-	isCollected = false;
+	collectedTime = 0;
 	if (isPowerup == 0)
 	{
 		sourceRect = new Rect(0.0f, 0.0f, 12, 12);

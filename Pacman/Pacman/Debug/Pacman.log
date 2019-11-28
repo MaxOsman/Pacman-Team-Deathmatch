@@ -14,11 +14,13 @@ D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         with
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         [
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :             _Ty=S2D::Input::Keys
 D:\Uni\Pacman\Pacman\S2D\Input.h(108): message :         ]
-D:\Uni\Pacman\Pacman\Pacman.cpp(68,18): warning C4154: deletion of an array expression; conversion to pointer supplied
-D:\Uni\Pacman\Pacman\Pacman.cpp(69,20): warning C4154: deletion of an array expression; conversion to pointer supplied
-D:\Uni\Pacman\Pacman\Pacman.cpp(205,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Uni\Pacman\Pacman\Pacman.cpp(205,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-D:\Uni\Pacman\Pacman\Pacman.cpp(607,61): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-D:\Uni\Pacman\Pacman\Pacman.cpp(619,60): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
-D:\Uni\Pacman\Pacman\Pacman.cpp(158): warning C4715: 'Pacman::LoadTile': not all control paths return a value
+D:\Uni\Pacman\Pacman\Pacman.cpp(72,18): warning C4154: deletion of an array expression; conversion to pointer supplied
+D:\Uni\Pacman\Pacman\Pacman.cpp(73,20): warning C4154: deletion of an array expression; conversion to pointer supplied
+D:\Uni\Pacman\Pacman\Pacman.cpp(216,44): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(216,41): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(603,61): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(626,60): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(732,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(733,31): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+D:\Uni\Pacman\Pacman\Pacman.cpp(169): warning C4715: 'Pacman::LoadTile': not all control paths return a value
   Pacman.vcxproj -> D:\Uni\Pacman\Debug\Pacman.exe

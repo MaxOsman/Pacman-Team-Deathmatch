@@ -13,10 +13,13 @@
 #define BLUE 1
 
 //For Directions
-#define _RIGHT 0
-#define _DOWN 1
-#define _LEFT 2
-#define _UP 3
+enum Dir
+{
+	_RIGHT = 0,
+	_DOWN,
+	_LEFT,
+	_FORW
+};
 
 // Just need to include main header file
 #include "S2D/S2D.h"
@@ -34,7 +37,7 @@ struct Player
 	Rect* sourceRect; 
 	Texture2D* texture; 
 	Vector2* position;
-	bool canInput[4],				//1st = pacman, 2nd = direction.
+	bool canInput[4],
 		 canAnimate;
 };
 
@@ -46,13 +49,13 @@ struct Collectable
 	Vector2* position;
 	Rect* sourceRect;
 	Texture2D* texture;
-	bool isCollected;
+	int collectedTime;
 	Collectable(float x, float y, int isPowerup);
 };
 
 struct Graphic
 {
-	Vector2* pos;
+	Vector2* position;
 	Rect* sourceRect;
 	Texture2D* texture;
 };
@@ -81,6 +84,7 @@ private:
 
 	//Methods
 	void Input(int elapsedTime, Input::KeyboardState* state);
+	void CanMoveSet(int pacNum, Dir dir, Input::Keys key, Input::KeyboardState* state);
 	void InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys upKey, Input::Keys leftKey, Input::Keys downKey, Input::Keys rightKey, int pacNum);
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckStart(Input::KeyboardState* state);
@@ -90,6 +94,9 @@ private:
 	bool MunchieCollisionDetection(float pacx, float pacy, float pacwidth, float pacheight, float munchx, float munchy, float munchwidth, float munchheight);
 	void RedCherry(int i, int elaspedTime);
 	void BlueCherry(int i, int elaspedTime);
+	void GreenCherry(int i, Input::MouseState* state);
+	void MunchieCollInteraction(int i);
+	void PowerupCollInteraction(int i);
 
 	//Tile* temp_func();
 
@@ -97,6 +104,7 @@ private:
 	Player *_pacman[4];
 	const int _cPacmanFrameTime;
 	int frozenTime;
+	int pacmanWithGreen;
 
 	//Team Data
 	int _teamScores[2];		//0 = red, 1 = blue
@@ -104,7 +112,6 @@ private:
 	//Munchie data
 	std::vector<Collectable*> _munchie;
 	const int _cMunchieFrameTime;
-
 	int munchieCurrentFrameTime,
 		munchieFrame; 
 
@@ -115,26 +122,23 @@ private:
 	bool _paused,
 	_startmenu,
 	_helpmenu;
-
 	Graphic *_arrow;
 	signed int _arrowPlace;	//0 = start, 1 = help, 2 = quit
 	Graphic *_menu;
 	Graphic *_start;
 	Graphic *_controls[4];
-
+	Graphic* _target;
 	Rect* _menuRectangle;
 	Vector2* _menuStringPosition,
 		*_titleStringPosition,
 		*_startStringPosition,
 		*_helpStringPosition,
 		*_quitStringPosition;
-
 	Vector2* _p1Pos,
 	*_p2Pos,
 	*_p3Pos,
 	*_p4Pos,
 	*_spacePos;
-
 	bool _pKeyDown,
 	_dirKeyDown,
 	_retKeyDown;
@@ -143,14 +147,15 @@ private:
 	Vector2* _stringPosition;
 
 	//Tiles
-	
 	std::vector<std::vector<Tile*>>* _tiles;
 	static const int Width;
 	static const int Height;
 	Vector2* Size;
-
 	int GetWidth();
 	int GetHeight();
+
+	//Sounds
+	SoundEffect* _pop;
 
 public:
 	void LoadTiles(int levelIndex);
