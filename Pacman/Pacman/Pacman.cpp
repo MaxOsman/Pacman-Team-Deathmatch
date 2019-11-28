@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdio.h>
 #include <iostream>
+#include <ctime>
 
 using namespace std;
 
@@ -46,9 +47,9 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 	pacmanWithGreen = -1;
 
 	//Initialise important Game aspects
+	Audio::Initialise();
 	Graphics::Initialise(argc, argv, this, 1024, 992, false, 25, 25, "Pacman", 60);
 	Input::Initialise();
-	Audio::Initialise();
 
 	LoadTiles(0);
 
@@ -738,26 +739,44 @@ void Pacman::GreenCherry(int i, Input::MouseState* state)
 	}
 }
 
+void Pacman::YellowCherry(int i)
+{
+	for (int j = 0; j < (int)_munchie.size(); ++j)
+	{
+		Collectable* tempMunch = _munchie[j];
+		int time = clock();
+		float difference = (time - tempMunch->collectedTime) / CLOCKS_PER_SEC;
+		if (difference <= 30.0f && tempMunch->isCollected == true)
+		{
+			tempMunch->texture->Load("Textures/Munchies.png", false);
+			tempMunch->isCollected = false;
+		}
+	}
+}
+
+void Pacman::RefreshMunchie(Collectable* tempMunch)
+{
+	int time = clock();
+	float difference = (time - tempMunch->collectedTime) / CLOCKS_PER_SEC;
+	if (difference > 30.0f && tempMunch->isCollected == true)
+	{
+		tempMunch->texture->Load("Textures/Munchies.png", false);
+		tempMunch->isCollected = false;
+	}
+}
+
 void Pacman::MunchieCollInteraction(int i)
 {
 	//collision between munchie and pacman
 	for (int j = 0; j < (int)_munchie.size(); ++j)
 	{
 		Collectable* tempMunch = _munchie[j];
-		if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempMunch->position->X, tempMunch->position->Y, 12, 12) == true && tempMunch->collectedTime <= 0)
+		RefreshMunchie(tempMunch);
+		if (MunchieCollisionDetection(_pacman[i]->position->X, _pacman[i]->position->Y, 27, 27, tempMunch->position->X, tempMunch->position->Y, 12, 12) == true && tempMunch->isCollected == false)
 		{
 			tempMunch->texture->Load("Textures/MunchiesEmpty.png", false);
-			tempMunch->collectedTime = 60;
-
-			/*std::cout << "Test." << std::endl;
-			if (!Audio::IsInitialised())
-			{
-				std::cout << "Not init." << std::endl;
-			}
-			if (!_pop->IsLoaded())
-			{
-				std::cout << "Not load." << std::endl;
-			}*/
+			tempMunch->collectedTime = clock();
+			tempMunch->isCollected = true;
 
 			Audio::Play(_pop);
 			if (i == 0 || i == 1)
@@ -806,7 +825,7 @@ void Pacman::PowerupCollInteraction(int i)
 			}
 			else if (tempPower->type == 4)
 			{
-
+				YellowCherry(i);
 			}
 			tempPower->position->X = -200;
 		}
@@ -879,7 +898,7 @@ void Pacman::Draw(int elapsedTime)
 	stringstream stream;
 	
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	stream << _pacman[0]->direction;
+	//stream << (CLOCKS_PER_SEC);
 
 	DrawTiles();		//Draws level
 	
@@ -997,6 +1016,7 @@ Collectable::Collectable(float x, float y, int isPowerup)
 	texture = new Texture2D;
 	position = new Vector2(x * 32.0f, y * 32.0f);
 	collectedTime = 0;
+	isCollected = false;
 	if (isPowerup == 0)
 	{
 		sourceRect = new Rect(0.0f, 0.0f, 12, 12);

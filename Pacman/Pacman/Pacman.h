@@ -50,6 +50,7 @@ struct Collectable
 	Rect* sourceRect;
 	Texture2D* texture;
 	int collectedTime;
+	bool isCollected;
 	Collectable(float x, float y, int isPowerup);
 };
 
@@ -95,8 +96,10 @@ private:
 	void RedCherry(int i, int elaspedTime);
 	void BlueCherry(int i, int elaspedTime);
 	void GreenCherry(int i, Input::MouseState* state);
+	void YellowCherry(int i);
 	void MunchieCollInteraction(int i);
 	void PowerupCollInteraction(int i);
+	void RefreshMunchie(Collectable* tempMunch);
 
 	//Tile* temp_func();
 
