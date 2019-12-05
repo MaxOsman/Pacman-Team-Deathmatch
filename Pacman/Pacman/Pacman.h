@@ -32,19 +32,22 @@ struct Player
 	float speedMultiplier; 
 	int currentFrameTime,
 		direction,			//0=right, 1=down, 2=left, 3=up
+		previousDir,
 		frame,
-		speedCurrentFrameTime;
+		speedCurrentFrameTime,
+		isKnockedBack;
 	Rect* sourceRect; 
 	Texture2D* texture; 
 	Vector2* position;
 	bool canInput[4],
-		 canAnimate;
+		canAnimate,
+		isDying,
+		canMove[4],
+		isCPU;
 };
 
 struct Collectable
 {
-	//int currentFrameTime,
-	    //frame;
 	int type;
 	Vector2* position;
 	Rect* sourceRect;
@@ -66,12 +69,9 @@ struct Tile
 public:
 	Texture2D* Texture;
 	bool isSolid;
-
 	static const int Width;
 	static const int Height;
-
 	static const Vector2* Size;
-
 	Tile(Texture2D* texture, bool isSolid);
 	~Tile(void);
 };
@@ -85,7 +85,7 @@ private:
 
 	//Methods
 	void Input(int elapsedTime, Input::KeyboardState* state);
-	void CanMoveSet(int pacNum, Dir dir, Input::Keys key, Input::KeyboardState* state);
+	void CanInputSet(int pacNum, Dir dir, Input::Keys key, Input::KeyboardState* state);
 	void InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys upKey, Input::Keys leftKey, Input::Keys downKey, Input::Keys rightKey, int pacNum);
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckStart(Input::KeyboardState* state);
@@ -99,15 +99,19 @@ private:
 	void YellowCherry(int i);
 	void MunchieCollInteraction(int i);
 	void PowerupCollInteraction(int i);
-	void RefreshMunchie(Collectable* tempMunch);
-
-	//Tile* temp_func();
+	void RefreshMunchie(Collectable* refMunch);
+	void KillPacman(int j);
+	void UpdatePacmanSet(int i, int elapsedTime);
+	void WallCollision(int i, int elapsedTime);
 
 	//Pacman data
-	Player *_pacman[4];
+	Player *_pacman;				//1st = pacman, 2nd = ghost
 	const int _cPacmanFrameTime;
 	int frozenTime;
 	int pacmanWithGreen;
+	int tempClockValue;
+	int tempClockValue2;
+	int finalTemp;
 
 	//Team Data
 	int _teamScores[2];		//0 = red, 1 = blue
@@ -123,28 +127,35 @@ private:
 
 	//Menu data
 	bool _paused,
-	_startmenu,
-	_helpmenu;
-	Graphic *_arrow;
+		_startmenu,
+		_helpmenu,
+		_playermenu;
 	signed int _arrowPlace;	//0 = start, 1 = help, 2 = quit
+	Graphic *_arrow;
 	Graphic *_menu;
 	Graphic *_start;
-	Graphic *_controls[4];
+	Graphic *_controls;
+	Graphic* _playerHelp;
 	Graphic* _target;
 	Rect* _menuRectangle;
-	Vector2* _menuStringPosition,
-		*_titleStringPosition,
-		*_startStringPosition,
-		*_helpStringPosition,
-		*_quitStringPosition;
+	Vector2* _1stMenuPosition,
+		*_2ndMenuPosition,
+		*_3rdMenuPosition,
+		*_4thMenuPosition,
+		*_5thMenuPosition,
+		*_6thMenuPosition;
 	Vector2* _p1Pos,
-	*_p2Pos,
-	*_p3Pos,
-	*_p4Pos,
-	*_spacePos;
+		* _p2Pos,
+		* _p3Pos,
+		* _p4Pos,
+		* _spacePos,
+		* _pacHelpPos,
+		* _ghostHelpPos;
 	bool _pKeyDown,
 	_dirKeyDown,
 	_retKeyDown;
+	const int gameWidth,
+		      gameHeight;
 	
 	// Position for String
 	Vector2* _stringPosition;
@@ -159,6 +170,9 @@ private:
 
 	//Sounds
 	SoundEffect* _pop;
+	SoundEffect* _death;
+	SoundEffect* _power;
+	SoundEffect* _bump;
 
 public:
 	void LoadTiles(int levelIndex);
