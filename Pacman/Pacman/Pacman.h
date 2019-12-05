@@ -138,12 +138,8 @@ private:
 	Graphic* _playerHelp;
 	Graphic* _target;
 	Rect* _menuRectangle;
-	Vector2* _1stMenuPosition,
-		*_2ndMenuPosition,
-		*_3rdMenuPosition,
-		*_4thMenuPosition,
-		*_5thMenuPosition,
-		*_6thMenuPosition;
+	Vector2* _menuPositions[6];
+	Vector2* _cpuHumanPositions[4];
 	Vector2* _p1Pos,
 		* _p2Pos,
 		* _p3Pos,

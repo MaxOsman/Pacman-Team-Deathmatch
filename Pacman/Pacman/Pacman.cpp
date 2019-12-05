@@ -18,6 +18,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanFrameTime(250
 {
 	_pacman = new Player[4];
 	_controls = new Graphic[4];
+	//_menuPositions = new Vector2[6];
 	for (int i = 0; i < 4; i++)
 	{
 		_pacman[i].direction = -1;
@@ -114,12 +115,8 @@ Pacman::~Pacman()
 	delete _target->position;
 	delete _target;
 
-	delete _1stMenuPosition;
-	delete _2ndMenuPosition;
-	delete _3rdMenuPosition;
-	delete _4thMenuPosition;
-	delete _5thMenuPosition;
-	delete _6thMenuPosition;
+	delete[] _menuPositions;
+	delete[] _cpuHumanPositions;
 
 	delete _pacHelpPos;
 	delete _ghostHelpPos;
@@ -357,12 +354,16 @@ void Pacman::LoadContent()
 	_start->texture->Load("Textures/Start.png", false);
 	_start->sourceRect = new Rect(0.0f, 0.0f, gameWidth, gameHeight);
 
-	_1stMenuPosition = new Vector2((gameWidth / 2.0f) - 64, (gameHeight / 2.0f) - 128);
-	_2ndMenuPosition = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) - 64);
-	_3rdMenuPosition = new Vector2((gameWidth / 2.0f) - 128, gameHeight / 2.0f);
-	_4thMenuPosition = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 64);
-	_5thMenuPosition = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 128);
-	_6thMenuPosition = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 192);
+	_menuPositions[0] = new Vector2((gameWidth / 2.0f) - 64, (gameHeight / 2.0f) - 128);
+	_menuPositions[1] = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) - 64);
+	_menuPositions[2] = new Vector2((gameWidth / 2.0f) - 128, gameHeight / 2.0f);
+	_menuPositions[3] = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 64);
+	_menuPositions[4] = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 128);
+	_menuPositions[5] = new Vector2((gameWidth / 2.0f) - 128, (gameHeight / 2.0f) + 192);
+	_cpuHumanPositions[0] = new Vector2((gameWidth / 2.0f) + 70, (gameHeight / 2.0f) - 64);
+	_cpuHumanPositions[1] = new Vector2((gameWidth / 2.0f) + 70, (gameHeight / 2.0f));
+	_cpuHumanPositions[2] = new Vector2((gameWidth / 2.0f) + 70, (gameHeight / 2.0f) + 64);
+	_cpuHumanPositions[3] = new Vector2((gameWidth / 2.0f) + 70, (gameHeight / 2.0f) + 128);
 
 	//Target Data
 	_target->texture = new Texture2D();
@@ -459,6 +460,17 @@ void Pacman::InputSet(int elapsedTime, Input::KeyboardState* state, Input::Keys 
 					Audio::Play(_bump);
 					_pacman[j].isKnockedBack = 10;
 					_pacman[i].isKnockedBack = 10;
+					if (_pacman[i].direction == _pacman[j].direction)
+					{
+						if ((i == 0 && j == 2) || (i == 2 && j == 0))
+						{
+							_pacman[0].direction = -1;
+						}
+						if ((i == 1 && j == 3) || (i == 3 && j == 1))
+						{
+							_pacman[1].direction = -1;
+						}
+					}
 				}
 				//"i" is the killer, "j" gets killed.
 				//only ghosts (1 or 3) can kill pacmen (0 or 2)
@@ -513,19 +525,19 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 		{
 			//Reverse movement than normal
 			_pacman[i].canAnimate = false;
-			if (_pacman[i].direction == _RIGHT && _pacman[i].canMove[_RIGHT])
+			if (_pacman[i].direction == _RIGHT && _pacman[i].canMove[_LEFT])
 			{
 				_pacman[i].position->X -= _pacman[i].speedMultiplier * elapsedTime; 
 			}
-			else if (_pacman[i].direction == _DOWN && _pacman[i].canMove[_DOWN])
+			else if (_pacman[i].direction == _DOWN && _pacman[i].canMove[_FORW])
 			{
 				_pacman[i].position->Y -= _pacman[i].speedMultiplier * elapsedTime; 
 			}
-			else if (_pacman[i].direction == _LEFT && _pacman[i].canMove[_LEFT])
+			else if (_pacman[i].direction == _LEFT && _pacman[i].canMove[_RIGHT])
 			{
 				_pacman[i].position->X += _pacman[i].speedMultiplier * elapsedTime; 
 			}
-			else if (_pacman[i].direction == _FORW && _pacman[i].canMove[_FORW])
+			else if (_pacman[i].direction == _FORW && _pacman[i].canMove[_DOWN])
 			{
 				_pacman[i].position->Y += _pacman[i].speedMultiplier * elapsedTime; 
 			}
@@ -692,16 +704,16 @@ void Pacman::CheckStart(Input::KeyboardState* state)
 	{
 		if (!_startmenu && _playermenu)
 		{
-			if (_arrowPlace == 0)
-				_pacman[0].isCPU = !_pacman[0].isCPU;
-			if (_arrowPlace == 1)
-				_pacman[0].isCPU = !_pacman[0].isCPU;
-			if (_arrowPlace == 2)
-				_pacman[0].isCPU = !_pacman[0].isCPU;
-			if (_arrowPlace == 3)
-				_pacman[0].isCPU = !_pacman[0].isCPU;
+			for (int i = 0; i < 4; i++)
+			{
+				if (_arrowPlace == i)
+					_pacman[i].isCPU = !_pacman[i].isCPU;
+			}
 			if (_arrowPlace == 4)
+			{
 				_playermenu = false;
+				_arrowPlace = 0;
+			}
 		}
 		else
 		{
@@ -879,14 +891,14 @@ void Pacman::WallCollision(int i, int elapsedTime)
 			if (texture != nullptr)
 			{
 				Vector2* pos = new Vector2(x * 32, (y * 32)+64);
-				int left1 = _pacman[i].position->X + 2;
+				int left1 = _pacman[i].position->X;
 				int left2 = pos->X + 0;
-				int right1 = _pacman[i].position->X + 30;
-				int right2 = pos->X + 32;
-				int top1 = _pacman[i].position->Y + 2;
+				int right1 = _pacman[i].position->X + 27;
+				int right2 = pos->X + 31;
+				int top1 = _pacman[i].position->Y;
 				int top2 = pos->Y + 0;
-				int bottom1 = _pacman[i].position->Y + 30;
-				int bottom2 = pos->Y + 32;
+				int bottom1 = _pacman[i].position->Y + 27;
+				int bottom2 = pos->Y + 31;
 
 				for (int h = 0; h < 4; h++)
 				{
@@ -912,66 +924,32 @@ void Pacman::WallCollision(int i, int elapsedTime)
 					
 				if (canContinue)
 				{
-					if (bottom1 >= top2 && _pacman[i].direction == _DOWN)
+					if ((bottom1 >= top2 && _pacman[i].direction == _DOWN && _pacman[i].isKnockedBack == 0) || (bottom1 >= top2 && _pacman[i].direction == _FORW && _pacman[i].isKnockedBack > 0))
 					{
 						_pacman[i].canMove[_DOWN] = false;
 						_pacman[i].direction = _pacman[i].previousDir;
-						_pacman[i].position->Y = top2 - 29;
-						
-						if (_pacman[i].direction == _LEFT)
-						{
-							_pacman[i].position->X -= _pacman[i].speedMultiplier * elapsedTime;
-						}
-						else if (_pacman[i].direction == _RIGHT)
-						{
-							_pacman[i].position->X += _pacman[i].speedMultiplier * elapsedTime;
-						}
+						_pacman[i].position->Y = top2 - 28;
 					}
-					else if (top1 <= bottom2 && _pacman[i].direction == _FORW)
+					else if ((top1 <= bottom2 && _pacman[i].direction == _FORW && _pacman[i].isKnockedBack == 0) || (top1 <= bottom2 && _pacman[i].direction == _DOWN && _pacman[i].isKnockedBack > 0))
 					{
 						_pacman[i].canMove[_FORW] = false;
 						_pacman[i].direction = _pacman[i].previousDir;
 						_pacman[i].position->Y = bottom2 + 1;
-						if (_pacman[i].direction == _LEFT)
-						{
-							_pacman[i].position->X -= _pacman[i].speedMultiplier * elapsedTime;
-						}
-						else if (_pacman[i].direction == _RIGHT)
-						{
-							_pacman[i].position->X += _pacman[i].speedMultiplier * elapsedTime;
-						}
 					}
-					else if (right1 >= left2 && _pacman[i].direction == _RIGHT)
+					else if ((right1 >= left2 && _pacman[i].direction == _RIGHT && _pacman[i].isKnockedBack == 0) || (right1 >= left2 && _pacman[i].direction == _LEFT && _pacman[i].isKnockedBack > 0))
 					{
 						_pacman[i].canMove[_RIGHT] = false;
 						_pacman[i].direction = _pacman[i].previousDir;
-						_pacman[i].position->X = left2 - 29;
-						if (_pacman[i].direction == _FORW)
-						{
-							_pacman[i].position->Y -= _pacman[i].speedMultiplier * elapsedTime;
-						}
-						else if (_pacman[i].direction == _DOWN)
-						{
-							_pacman[i].position->Y += _pacman[i].speedMultiplier * elapsedTime;
-						}
+						_pacman[i].position->X = left2 - 28;
 					}
-					else if (left1 <= right2 && _pacman[i].direction == _LEFT)
+					else if ((left1 <= right2 && _pacman[i].direction == _LEFT && _pacman[i].isKnockedBack == 0) || (left1 <= right2 && _pacman[i].direction == _RIGHT && _pacman[i].isKnockedBack > 0))
 					{
 						_pacman[i].canMove[_LEFT] = false;
 						_pacman[i].direction = _pacman[i].previousDir;
 						_pacman[i].position->X = right2 + 1;
-						if (_pacman[i].direction == _FORW)
-						{
-							_pacman[i].position->X -= _pacman[i].speedMultiplier * elapsedTime;
-						}
-						else if (_pacman[i].direction == _DOWN)
-						{
-							_pacman[i].position->X += _pacman[i].speedMultiplier * elapsedTime;
-						}
 					}	
 				}
 			}
-			delete texture;
 		}
 	}
 }
@@ -1079,19 +1057,19 @@ void Pacman::Draw(int elapsedTime)
 		_arrow->position->Y = gameHeight / 2.0f + 48 + (64 * _arrowPlace);
 		
 		stream << "-PAUSED-";
-		SpriteBatch::DrawString(stream.str().c_str(), _1stMenuPosition, Color::White);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[0], Color::White);
 		stream.str(string());
 
 		stream << "Resume Game";
-		SpriteBatch::DrawString(stream.str().c_str(), _4thMenuPosition, Color::White);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[3], Color::White);
 		stream.str(string());
 
 		stream << "How To Play";
-		SpriteBatch::DrawString(stream.str().c_str(), _5thMenuPosition, Color::White);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[4], Color::White);
 		stream.str(string());
 
 		stream << "Quit";
-		SpriteBatch::DrawString(stream.str().c_str(), _6thMenuPosition, Color::White);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[5], Color::White);
 		stream.str(string());
 	}
 
@@ -1105,19 +1083,19 @@ void Pacman::Draw(int elapsedTime)
 			SpriteBatch::Draw(_arrow->texture, _arrow->position, _arrow->sourceRect);
 			
 			stream << "PACMAN";
-			SpriteBatch::DrawString(stream.str().c_str(), _1stMenuPosition, Color::White);
+			SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[0], Color::White);
 			stream.str(string());
 
 			stream << "Start Game";
-			SpriteBatch::DrawString(stream.str().c_str(), _4thMenuPosition, Color::White);
+			SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[3], Color::White);
 			stream.str(string());
 
 			stream << "How To Play";
-			SpriteBatch::DrawString(stream.str().c_str(), _5thMenuPosition, Color::White);
+			SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[4], Color::White);
 			stream.str(string());
 
 			stream << "Quit";
-			SpriteBatch::DrawString(stream.str().c_str(), _6thMenuPosition, Color::White);
+			SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[5], Color::White);
 			stream.str(string());
 		}
 	}
@@ -1130,27 +1108,38 @@ void Pacman::Draw(int elapsedTime)
 		_arrow->position->Y = gameHeight / 2.0f - 80 + (64 * _arrowPlace);
 
 		stream << "-Round Options-";
-		SpriteBatch::DrawString(stream.str().c_str(), _1stMenuPosition, Color::White);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[0], Color::White);
 		stream.str(string());
 
 		stream << "Player 1:";
-		SpriteBatch::DrawString(stream.str().c_str(), _2ndMenuPosition, Color::Cyan);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[1], Color::Cyan);
 		stream.str(string());
 
 		stream << "Player 2:";
-		SpriteBatch::DrawString(stream.str().c_str(), _3rdMenuPosition, Color::Cyan);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[2], Color::Cyan);
 		stream.str(string());
 
 		stream << "Player 3:";
-		SpriteBatch::DrawString(stream.str().c_str(), _4thMenuPosition, Color::Red);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[3], Color::Red);
 		stream.str(string());
 
 		stream << "Player 4:";
-		SpriteBatch::DrawString(stream.str().c_str(), _5thMenuPosition, Color::Red);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[4], Color::Red);
 		stream.str(string());
 
+		for (int i = 0; i < 4; i++)
+		{
+			if (_pacman[i].isCPU == false)
+				stream << "Human";
+			else
+				stream << "CPU";
+
+			SpriteBatch::DrawString(stream.str().c_str(), _cpuHumanPositions[i], Color::White);
+			stream.str(string());
+		}
+
 		stream << "Begin Round!";
-		SpriteBatch::DrawString(stream.str().c_str(), _6thMenuPosition, Color::Yellow);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[5], Color::Yellow);
 		stream.str(string());
 	}
 
