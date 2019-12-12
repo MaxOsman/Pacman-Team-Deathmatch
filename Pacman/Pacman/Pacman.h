@@ -41,7 +41,7 @@ struct Player
 		previousDir,
 		frame,
 		speedCurrentFrameTime,
-		isKnockedBack,
+		hasBounced,
 		dyingProgress;
 	unsigned int collectedTime;
 	Rect* sourceRect; 
@@ -51,8 +51,8 @@ struct Player
 	bool canInput[4],
 		canAnimate,
 		isDying,
-		canMove[4],
-		isCPU;
+		canMove[4];
+		//isCPU;
 };
 
 struct Collectable
@@ -120,7 +120,7 @@ private:
 	void KillPacmanSet(int j);
 	void UpdatePacmanSet(int i, int elapsedTime);
 	void WallCollision(int i, int elapsedTime);
-	Vector2* PacLocation(int i);
+	int OppositeDir(int dir);
 
 	//Pacman data
 	Player *_pacman;				//1st = pacman, 2nd = ghost
@@ -195,6 +195,7 @@ private:
 		powerupMessageCount;
 
 	int globalTime;
+	int timerSetting;
 	
 	// Position for String
 	Vector2* _stringPosition;
