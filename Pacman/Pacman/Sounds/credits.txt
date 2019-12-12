@@ -1,3 +1,4 @@
 Death sound:	plasterbrain
 Powerup sound:	OwlStorm
 Bump sound:		Raclure
+Laser sound:	notyermom
