@@ -1,0 +1,3 @@
+Death sound:	plasterbrain
+Powerup sound:	OwlStorm
+Laser sound:	notyermom
