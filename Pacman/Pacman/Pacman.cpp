@@ -1017,7 +1017,7 @@ void Pacman::RefreshPowerup(int i)
 		_powerup[i]->texture = _powerupTransTexture;
 		powerupMessageState = 1;
 	}
-	if (difference > 50.0f && _powerup[i]->isCollected == true)		//Powerup Full
+	if (difference > 60.0f && _powerup[i]->isCollected == true)		//Powerup Full
 	{
 		_powerup[i]->texture = _powerupFullTexture;
 		_powerup[i]->isCollected = false;
@@ -1358,7 +1358,7 @@ void Pacman::Draw(int elapsedTime)
 		{
 			SpriteBatch::Draw(_arrow->texture, _arrow->position, _arrow->sourceRect);
 			
-			stream << "PACMAN TEAM DEATHMATCH";
+			stream << "PACMAN  TEAM  DEATHMATCH";
 			SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[0], Color::White);
 			stream.str(string());
 			stream << "Start Game";
