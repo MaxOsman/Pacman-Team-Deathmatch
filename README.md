@@ -8,6 +8,7 @@ One of four powerups occasionally spawn in the form of cherries.
 - Blue cherry stops other team.
 - Green cherry lets you kill another player using mouse.
 - Yellow cherry replenishes munchies.
+
 Team with most eaten munchies wins!
 If you don't have four people, you can enable a simple AI for a player character.
 
