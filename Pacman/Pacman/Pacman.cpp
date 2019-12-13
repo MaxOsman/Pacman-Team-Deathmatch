@@ -1384,16 +1384,16 @@ void Pacman::Draw(int elapsedTime)
 		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[0], Color::White);
 		stream.str(string());
 		stream << "Player 1:";
-		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[1], Color::Cyan);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[1], Color::Red);
 		stream.str(string());
 		stream << "Player 2:";
-		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[2], Color::Cyan);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[2], Color::Red);
 		stream.str(string());
 		stream << "Player 3:";
-		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[3], Color::Red);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[3], Color::Cyan);
 		stream.str(string());
 		stream << "Player 4:";
-		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[4], Color::Red);
+		SpriteBatch::DrawString(stream.str().c_str(), _menuPositions[4], Color::Cyan);
 		stream.str(string());
 
 		for (int i = 0; i < 4; i++)
