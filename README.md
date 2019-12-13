@@ -19,6 +19,6 @@ If you don't have four people, you can enable a simple AI for a player character
 
 ## Credits
 Me, for making the game!
-Bandai Namco, so Pacman.
+Bandai Namco, for Pacman.
 Sound effects from freesound.org, credits in folder.
 Some graphics and sounds provided by Staffordshire Uni.
