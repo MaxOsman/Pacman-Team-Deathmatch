@@ -42,7 +42,8 @@ struct Player
 		frame,
 		speedCurrentFrameTime,
 		hasBounced,
-		dyingProgress;
+		dyingProgress,
+		cpuDir;
 	unsigned int collectedTime;
 	Rect* sourceRect; 
 	Texture2D* texture; 
@@ -51,8 +52,8 @@ struct Player
 	bool canInput[4],
 		canAnimate,
 		isDying,
-		canMove[4];
-		//isCPU;
+		canMove[4],
+		isCPU;
 };
 
 struct Collectable
@@ -121,6 +122,7 @@ private:
 	void UpdatePacmanSet(int i, int elapsedTime);
 	void WallCollision(int i, int elapsedTime);
 	int OppositeDir(int dir);
+	void UpdateCPU(int i);
 
 	//Pacman data
 	Player *_pacman;				//1st = pacman, 2nd = ghost
@@ -195,7 +197,7 @@ private:
 		powerupMessageCount;
 
 	int globalTime;
-	int timerSetting;
+	int cpuDirectionChangeTime[4];
 	
 	// Position for String
 	Vector2* _stringPosition;
@@ -212,7 +214,6 @@ private:
 	SoundEffect* _pop;
 	SoundEffect* _death;
 	SoundEffect* _power;
-	SoundEffect* _bump;
 	SoundEffect* _laser;
 
 public:
